@@ -37,6 +37,9 @@
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full transition duration-200">Entrar</button>
                 </form>
                 <p id="login-message" class="text-red-500 text-xs italic mt-4 text-center hidden">Credenciais inválidas ou usuário inativo.</p>
+                <p class="text-gray-500 text-xs text-center mt-4">Usuário inicial: <strong>Leandro</strong></p>
+                <p class="text-gray-500 text-xs text-center">Senha inicial: <strong>Ravel@2203rv</strong></p>
+                <button onclick="resetSystem()" class="mt-6 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg w-full transition duration-200">Resetar Sistema</button>
             </div>
         </div>
 
@@ -59,18 +62,18 @@
                 <aside id="sidebar" class="w-64 bg-blue-700 text-white p-4 hidden-mobile md:block shadow-lg md:relative absolute">
                     <nav>
                         <ul class="space-y-2">
-                            <li><a href="#" onclick="showSection('dashboard-section')" data-access-view="dashboard" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Dashboard</a></li>
-                            <li class="font-semibold mt-4 text-blue-200" data-access-category="cadastros">Cadastros</li>
-                            <li><a href="#" onclick="showSection('cadastro-chassi-section')" data-access-view="chassi" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Chassi</a></li>
-                            <li><a href="#" onclick="showSection('cadastro-modelo-section')" data-access-view="modelo" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Modelo</a></li>
-                            <li><a href="#" onclick="showSection('cadastro-patios-section')" data-access-view="patio" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Pátios</a></li>
-                            <li><a href="#" onclick="showSection('cadastro-usuarios-section')" data-access-view="usuario" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Usuários</a></li>
-                            <li class="font-semibold mt-4 text-blue-200" data-access-category="movimentacoes">Movimentações</li>
-                            <li><a href="#" onclick="showSection('entrada-veiculo-section')" data-access-view="entrada" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Entrada de Veículo</a></li>
-                            <li><a href="#" onclick="showSection('saida-veiculo-section')" data-access-view="saida" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Saída de Veículo</a></li>
-                            <li class="font-semibold mt-4 text-blue-200" data-access-category="relatorios">Relatórios</li>
-                            <li><a href="#" onclick="showSection('consulta-chassi-section')" data-access-view="consulta-chassi" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Consulta por Chassi</a></li>
-                            <li><a href="#" onclick="showSection('historico-movimentacao-section')" data-access-view="historico-movimentacao" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Histórico de Movimentação</a></li>
+                            <li><a href="#" onclick="showSection('dashboard-section')" data-view-resource="dashboard" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Dashboard</a></li>
+                            <li class="font-semibold mt-4 text-blue-200" data-category-type="cadastros">Cadastros</li>
+                            <li><a href="#" onclick="showSection('cadastro-chassi-section')" data-view-resource="chassi" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Chassi</a></li>
+                            <li><a href="#" onclick="showSection('cadastro-modelo-section')" data-view-resource="modelo" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Modelo</a></li>
+                            <li><a href="#" onclick="showSection('cadastro-patios-section')" data-view-resource="patio" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Pátios</a></li>
+                            <li><a href="#" onclick="showSection('cadastro-usuarios-section')" data-view-resource="usuario" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Usuários</a></li>
+                            <li class="font-semibold mt-4 text-blue-200" data-category-type="movimentacoes">Movimentações</li>
+                            <li><a href="#" onclick="showSection('entrada-veiculo-section')" data-view-resource="entrada" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Entrada de Veículo</a></li>
+                            <li><a href="#" onclick="showSection('saida-veiculo-section')" data-view-resource="saida" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Saída de Veículo</a></li>
+                            <li class="font-semibold mt-4 text-blue-200" data-category-type="relatorios">Relatórios</li>
+                            <li><a href="#" onclick="showSection('consulta-chassi-section')" data-view-resource="consulta-chassi" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Consulta por Chassi</a></li>
+                            <li><a href="#" onclick="showSection('historico-movimentacao-section')" data-view-resource="historico-movimentacao" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Histórico de Movimentação</a></li>
                             <li class="mt-4 md:hidden">
                                 <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md w-full text-sm">Sair</button>
                             </li>
@@ -81,13 +84,13 @@
                 <!-- Main Content -->
                 <main class="flex-1 p-4 md:p-8 overflow-y-auto">
                     <!-- Dashboard Section -->
-                    <section id="dashboard-section" class="page-section active bg-white p-6 rounded-lg shadow-md mb-4" data-access-section="dashboard">
+                    <section id="dashboard-section" class="page-section active bg-white p-6 rounded-lg shadow-md mb-4" data-section-resource="dashboard">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800">Dashboard</h2>
                         <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
                     </section>
 
                     <!-- Cadastro Chassi Section -->
-                    <section id="cadastro-chassi-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-access-section="chassi">
+                    <section id="cadastro-chassi-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-section-resource="chassi">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800">Cadastro de Chassi</h2>
                         <form id="chassi-form" onsubmit="event.preventDefault(); handleSubmitChassi();" class="space-y-4">
                             <div>
@@ -108,7 +111,7 @@
                                 <label for="chassi-ano" class="block text-gray-700 text-sm font-semibold mb-2">Ano</label>
                                 <input type="number" id="chassi-ano" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" min="1900" max="2100" required>
                             </div>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-access-action="create-chassi">Cadastrar Chassi</button>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-action-resource="create-chassi">Cadastrar Chassi</button>
                         </form>
                         <div class="mt-8">
                             <h3 class="text-xl font-bold mb-4">Chassis Cadastrados</h3>
@@ -129,7 +132,7 @@
                     </section>
 
                     <!-- Cadastro Modelo Section -->
-                    <section id="cadastro-modelo-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-access-section="modelo">
+                    <section id="cadastro-modelo-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-section-resource="modelo">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800">Cadastro de Modelo</h2>
                         <form id="modelo-form" onsubmit="event.preventDefault(); handleSubmitModelo();" class="space-y-4">
                             <div>
@@ -140,7 +143,7 @@
                                 <label for="modelo-marca" class="block text-gray-700 text-sm font-semibold mb-2">Marca</label>
                                 <input type="text" id="modelo-marca" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
                             </div>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-access-action="create-modelo">Cadastrar Modelo</button>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-action-resource="create-modelo">Cadastrar Modelo</button>
                         </form>
                         <div class="mt-8">
                             <h3 class="text-xl font-bold mb-4">Modelos Cadastrados</h3>
@@ -159,14 +162,14 @@
                     </section>
 
                     <!-- Cadastro Patios Section -->
-                    <section id="cadastro-patios-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-access-section="patio">
+                    <section id="cadastro-patios-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-section-resource="patio">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800">Cadastro de Pátios</h2>
                         <form id="patio-form" onsubmit="event.preventDefault(); handleSubmitPatio();" class="space-y-4">
                             <div>
                                 <label for="patio-nome" class="block text-gray-700 text-sm font-semibold mb-2">Nome do Pátio</label>
                                 <input type="text" id="patio-nome" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
                             </div>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-access-action="create-patio">Cadastrar Pátio</button>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-action-resource="create-patio">Cadastrar Pátio</button>
                         </form>
                         <div class="mt-8">
                             <h3 class="text-xl font-bold mb-4">Pátios Cadastrados</h3>
@@ -184,7 +187,7 @@
                     </section>
 
                     <!-- Cadastro Usuarios Section -->
-                    <section id="cadastro-usuarios-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-access-section="usuario">
+                    <section id="cadastro-usuarios-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-section-resource="usuario">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800">Gestão de Usuários</h2>
                         <form id="usuario-form" onsubmit="event.preventDefault(); handleSubmitUsuario();" class="space-y-4 mb-8">
                             <input type="hidden" id="usuario-id">
@@ -211,7 +214,7 @@
                                     <option value="inativo">Inativo</option>
                                 </select>
                             </div>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-access-action="create-edit-usuario" id="submit-user-button">Cadastrar Usuário</button>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-action-resource="create-edit-usuario" id="submit-user-button">Cadastrar Usuário</button>
                             <button type="button" onclick="clearUserForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg ml-2 transition duration-200">Limpar</button>
                         </form>
                         <div class="mt-8">
@@ -233,7 +236,7 @@
                     </section>
 
                     <!-- Entrada Veiculo Section -->
-                    <section id="entrada-veiculo-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-access-section="entrada">
+                    <section id="entrada-veiculo-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-section-resource="entrada">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800">Entrada de Veículo</h2>
                         <form id="entrada-form" onsubmit="event.preventDefault(); handleSubmitEntrada();" class="space-y-4">
                             <div>
@@ -260,12 +263,12 @@
                                 <label for="entrada-foto" class="block text-gray-700 text-sm font-semibold mb-2">Upload de Foto (simulado)</label>
                                 <input type="file" id="entrada-foto" accept="image/*" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-access-action="create-entrada">Registrar Entrada</button>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-action-resource="create-entrada">Registrar Entrada</button>
                         </form>
                     </section>
 
                     <!-- Saida Veiculo Section -->
-                    <section id="saida-veiculo-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-access-section="saida">
+                    <section id="saida-veiculo-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-section-resource="saida">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800">Saída de Veículo</h2>
                         <form id="saida-form" onsubmit="event.preventDefault(); handleSubmitSaida();" class="space-y-4">
                             <div>
@@ -284,22 +287,22 @@
                                 <label for="saida-observacoes" class="block text-gray-700 text-sm font-semibold mb-2">Observações de Saída</label>
                                 <textarea id="saida-observacoes" rows="3" class="form-textarea w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"></textarea>
                             </div>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-access-action="create-saida">Registrar Saída</button>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-action-resource="create-saida">Registrar Saída</button>
                         </form>
                     </section>
 
                     <!-- Consulta Chassi Section -->
-                    <section id="consulta-chassi-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-access-section="consulta-chassi">
+                    <section id="consulta-chassi-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-section-resource="consulta-chassi">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800">Consulta por Chassi</h2>
                         <form onsubmit="event.preventDefault(); handleConsultaChassi();" class="mb-4 flex space-x-2">
                             <input type="text" id="consulta-chassi-input" class="form-input flex-1 p-2 border rounded focus:ring-blue-500 focus:border-blue-500" placeholder="Digite o número do chassi" required>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-access-action="view-consulta-chassi">Consultar</button>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-action-resource="view-consulta-chassi">Consultar</button>
                         </form>
                         <div id="consulta-chassi-results" class="mt-4"></div>
                     </section>
 
                     <!-- Historico Movimentacao Section -->
-                    <section id="historico-movimentacao-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-access-section="historico-movimentacao">
+                    <section id="historico-movimentacao-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4" data-section-resource="historico-movimentacao">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800">Histórico de Movimentação</h2>
                         <div class="overflow-x-auto">
                             <table class="min-w-full bg-white border border-gray-200">
@@ -325,6 +328,9 @@
 
     <script>
         const LS_PREFIX = 'grupo_ravel_patio_';
+        const DEFAULT_ADMIN_USERNAME = 'Leandro';
+        const DEFAULT_ADMIN_PASSWORD = 'Ravel@2203rv';
+        const DEFAULT_ADMIN_ID = 'admin-leandro';
 
         const ROLES = {
             ADMINISTRADOR: 'administrador',
@@ -367,14 +373,14 @@
         }
 
         function initializeLocalStorage() {
-            // Initialize users with default admin if none exist
             let users = loadData('users');
-            const defaultAdminUsername = 'Leandro';
-            if (users.length === 0 || !users.some(u => u.username === defaultAdminUsername)) {
-                users.push({
-                    id: 'admin-leandro',
-                    username: defaultAdminUsername,
-                    password: 'Ravel@2203rv',
+            const defaultAdminExists = users.some(u => u.id === DEFAULT_ADMIN_ID);
+
+            if (!defaultAdminExists) {
+                users.unshift({ // Add to the beginning
+                    id: DEFAULT_ADMIN_ID,
+                    username: DEFAULT_ADMIN_USERNAME,
+                    password: DEFAULT_ADMIN_PASSWORD,
                     role: ROLES.ADMINISTRADOR,
                     status: 'ativo',
                     createdAt: new Date().toISOString()
@@ -382,7 +388,6 @@
                 saveData('users', users);
             }
 
-            // Initialize other data if empty
             if (loadData('chassis').length === 0) saveData('chassis', []);
             if (loadData('models').length === 0) saveData('models', []);
             if (loadData('yards').length === 0) saveData('yards', []);
@@ -390,24 +395,28 @@
             if (loadData('movements').length === 0) saveData('movements', []);
         }
 
+        function resetSystem() {
+            if (confirm('Tem certeza que deseja resetar o sistema? Todos os dados serão apagados e o administrador padrão será recriado.')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
         // Access Control
         function hasPermission(action, resource) {
-            if (!loggedInUser || !loggedInUser.role) return false;
+            if (!loggedInUser || !loggedInUser.role || loggedInUser.status !== 'ativo') return false;
             const userPermissions = PERMISSIONS[loggedInUser.role];
 
             if (!userPermissions) return false; // Role not found
 
-            if (action.startsWith('view-')) {
-                const viewResource = resource.replace('view-', '');
-                return userPermissions.canView && userPermissions.canView.includes(viewResource);
+            if (action === 'view') {
+                return userPermissions.canView && userPermissions.canView.includes(resource);
             }
-            if (action.startsWith('create-') || action.startsWith('edit-')) {
-                const createEditResource = resource.replace('create-', '').replace('edit-', '');
-                return userPermissions.canCreateEdit && userPermissions.canCreateEdit.includes(createEditResource);
+            if (action === 'create' || action === 'edit') {
+                return userPermissions.canCreateEdit && userPermissions.canCreateEdit.includes(resource);
             }
-            if (action.startsWith('delete-')) {
-                const deleteResource = resource.replace('delete-', '');
-                return userPermissions.canDelete && userPermissions.canDelete.includes(deleteResource);
+            if (action === 'delete') {
+                return userPermissions.canDelete && userPermissions.canDelete.includes(resource);
             }
 
             return false; // Unknown action type
@@ -421,27 +430,21 @@
             document.getElementById('logged-in-role').textContent = loggedInUser ? loggedInUser.role.toUpperCase() : '';
 
             // Sidebar links
-            document.querySelectorAll('#sidebar a[data-access-view]').forEach(link => {
-                const resource = link.dataset.accessView;
+            document.querySelectorAll('#sidebar a[data-view-resource]').forEach(link => {
+                const resource = link.dataset.viewResource;
+                const listItem = link.parentElement;
                 if (hasPermission('view', resource)) {
-                    link.parentElement.classList.remove('hidden');
+                    listItem.classList.remove('hidden');
                 } else {
-                    link.parentElement.classList.add('hidden');
+                    listItem.classList.add('hidden');
                 }
             });
+
             // Sidebar categories (e.g., Cadastros, Movimentações, Relatórios)
-            document.querySelectorAll('#sidebar li[data-access-category]').forEach(category => {
+            document.querySelectorAll('#sidebar li[data-category-type]').forEach(categoryTitle => {
                 let hasVisibleLink = false;
-                category.nextElementSibling.querySelectorAll('a[data-access-view]').forEach(link => {
-                    if (!link.parentElement.classList.contains('hidden')) {
-                        hasVisibleLink = true;
-                    }
-                });
-                // This logic needs to iterate over all direct children that are 'li' elements and check their visibility
-                // A more robust solution for categories would require grouping them better or checking all sub-items.
-                // For simplicity here, we'll assume direct children of the category li are checked.
-                let nextSibling = category.nextElementSibling;
-                while(nextSibling && nextSibling.tagName === 'LI' && !nextSibling.querySelector('[data-access-category]')) {
+                let nextSibling = categoryTitle.nextElementSibling;
+                while(nextSibling && nextSibling.tagName === 'LI' && !nextSibling.hasAttribute('data-category-type')) {
                     if(!nextSibling.classList.contains('hidden')) {
                         hasVisibleLink = true;
                         break;
@@ -449,102 +452,66 @@
                     nextSibling = nextSibling.nextElementSibling;
                 }
                 if (hasVisibleLink) {
-                    category.classList.remove('hidden');
+                    categoryTitle.classList.remove('hidden');
                 } else {
-                    category.classList.add('hidden');
+                    categoryTitle.classList.add('hidden');
                 }
             });
 
             // Form buttons and sections
-            document.querySelectorAll('[data-access-section]').forEach(section => {
-                const resource = section.dataset.accessSection;
-                if (hasPermission('view', resource)) {
-                    // Section itself is managed by showSection. Here we control buttons within it.
-                    section.querySelectorAll('[data-access-action]').forEach(button => {
-                        const action = button.dataset.accessAction.split('-')[0]; // e.g., 'create', 'edit', 'delete'
-                        const actionResource = button.dataset.accessAction.split('-').slice(1).join('-'); // e.g., 'chassi', 'usuario'
-                        if (hasPermission(action, actionResource)) {
-                            button.classList.remove('hidden', 'pointer-events-none', 'opacity-50');
-                            button.disabled = false;
-                        } else {
-                            button.classList.add('hidden', 'pointer-events-none', 'opacity-50');
-                            button.disabled = true;
-                        }
-                    });
-                } else {
-                    // If the section itself isn't viewable, hide all its action buttons as well.
-                    section.querySelectorAll('[data-access-action]').forEach(button => {
+            document.querySelectorAll('[data-section-resource]').forEach(section => {
+                const resource = section.dataset.sectionResource;
+                // If the user can't even view the section, hide its actions too.
+                if (!hasPermission('view', resource)) {
+                     section.querySelectorAll('[data-action-resource]').forEach(button => {
                         button.classList.add('hidden', 'pointer-events-none', 'opacity-50');
                         button.disabled = true;
                     });
+                    return; // No need to check actions if section itself is not visible
+                }
+
+                section.querySelectorAll('[data-action-resource]').forEach(button => {
+                    const actionResource = button.dataset.actionResource; // e.g., 'create-chassi', 'edit-usuario'
+                    const [action, resourceName] = actionResource.split('-');
+
+                    if (hasPermission(action, resourceName)) {
+                        button.classList.remove('hidden', 'pointer-events-none', 'opacity-50');
+                        button.disabled = false;
+                    } else {
+                        button.classList.add('hidden', 'pointer-events-none', 'opacity-50');
+                        button.disabled = true;
+                    }
+                });
+
+                // For 'Gestão de Usuários' table actions, they are rendered dynamically, so update them after renderUsers()
+                if (resource === 'usuario') {
+                    renderUsers(); // Re-render to update edit/delete buttons
                 }
             });
-
-            // Special case for 'Cadastros' title in sidebar: hide if no sub-items are visible
-            const cadastroLinks = document.querySelectorAll('#sidebar a[data-access-view="chassi"], #sidebar a[data-access-view="modelo"], #sidebar a[data-access-view="patio"], #sidebar a[data-access-view="usuario"]');
-            let anyCadastroVisible = false;
-            cadastroLinks.forEach(link => {
-                if (!link.parentElement.classList.contains('hidden')) {
-                    anyCadastroVisible = true;
-                }
-            });
-            const cadastroCategoryTitle = document.querySelector('li[data-access-category="cadastros"]');
-            if (cadastroCategoryTitle) {
-                if (anyCadastroVisible) {
-                    cadastroCategoryTitle.classList.remove('hidden');
-                } else {
-                    cadastroCategoryTitle.classList.add('hidden');
-                }
-            }
-             // Special case for 'Movimentacoes' title in sidebar
-             const movimentacoesLinks = document.querySelectorAll('#sidebar a[data-access-view="entrada"], #sidebar a[data-access-view="saida"]');
-             let anyMovimentacoesVisible = false;
-             movimentacoesLinks.forEach(link => {
-                 if (!link.parentElement.classList.contains('hidden')) {
-                     anyMovimentacoesVisible = true;
-                 }
-             });
-             const movimentacoesCategoryTitle = document.querySelector('li[data-access-category="movimentacoes"]');
-             if (movimentacoesCategoryTitle) {
-                 if (anyMovimentacoesVisible) {
-                     movimentacoesCategoryTitle.classList.remove('hidden');
-                 } else {
-                     movimentacoesCategoryTitle.classList.add('hidden');
-                 }
-             }
-
-             // Special case for 'Relatorios' title in sidebar
-             const relatoriosLinks = document.querySelectorAll('#sidebar a[data-access-view="consulta-chassi"], #sidebar a[data-access-view="historico-movimentacao"]');
-             let anyRelatoriosVisible = false;
-             relatoriosLinks.forEach(link => {
-                 if (!link.parentElement.classList.contains('hidden')) {
-                     anyRelatoriosVisible = true;
-                 }
-             });
-             const relatoriosCategoryTitle = document.querySelector('li[data-access-category="relatorios"]');
-             if (relatoriosCategoryTitle) {
-                 if (anyRelatoriosVisible) {
-                     relatoriosCategoryTitle.classList.remove('hidden');
-                 } else {
-                     relatoriosCategoryTitle.classList.add('hidden');
-                 }
-             }
         }
 
         // UI State Management
         function showSection(sectionId) {
-            const resource = document.getElementById(sectionId).dataset.accessSection;
-            if (!hasPermission('view', resource)) {
+            const targetSection = document.getElementById(sectionId);
+            const resource = targetSection ? targetSection.dataset.sectionResource : null;
+            
+            if (resource && !hasPermission('view', resource)) {
                 alert('Você não tem permissão para acessar esta tela.');
-                // Optionally redirect to dashboard or previous page
-                showSection('dashboard-section'); 
+                // Attempt to redirect to a default viewable page or just stay put if no other viewable page
+                if (loggedInUser && hasPermission('view', 'dashboard')) {
+                     showSection('dashboard-section');
+                } else if (loggedInUser && hasPermission('view', 'entrada')) {
+                    showSection('entrada-veiculo-section');
+                } else if (loggedInUser && hasPermission('view', 'consulta-chassi')) {
+                    showSection('consulta-chassi-section');
+                }
                 return;
             }
 
             document.querySelectorAll('.page-section').forEach(section => {
                 section.classList.remove('active');
             });
-            const targetSection = document.getElementById(sectionId);
+            
             if (targetSection) {
                 targetSection.classList.add('active');
                 
@@ -678,8 +645,8 @@
             document.getElementById('main-app').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('login-message').classList.add('hidden');
-            document.getElementById('username').value = 'Leandro'; // Reset for convenience
-            document.getElementById('password').value = 'Ravel@2203rv'; // Reset for convenience
+            document.getElementById('username').value = DEFAULT_ADMIN_USERNAME; // Reset for convenience
+            document.getElementById('password').value = DEFAULT_ADMIN_PASSWORD; // Reset for convenience
             updateUIAccess(); // Reset UI elements visibility
         }
 
@@ -813,8 +780,13 @@
         }
 
         function handleSubmitUsuario() {
-            if (!hasPermission('create', 'usuario') && !hasPermission('edit', 'usuario')) { 
-                alert('Você não tem permissão para cadastrar ou editar usuários.'); 
+            const isCreating = !document.getElementById('usuario-id').value;
+            if (isCreating && !hasPermission('create', 'usuario')) { 
+                alert('Você não tem permissão para cadastrar usuários.'); 
+                return; 
+            }
+            if (!isCreating && !hasPermission('edit', 'usuario')) { 
+                alert('Você não tem permissão para editar usuários.'); 
                 return; 
             }
 
@@ -824,13 +796,13 @@
             const role = document.getElementById('usuario-role').value.trim();
             const status = document.getElementById('usuario-status').value.trim();
 
-            if (!username || !role || (!id && !password)) { // Password required for new user
+            if (!username || !role || (isCreating && !password)) { // Password required for new user
                 alert('Por favor, preencha todos os campos obrigatórios do usuário.');
                 return;
             }
 
             let users = loadData('users');
-            const isEditingLeandro = (id === 'admin-leandro');
+            const isEditingLeandro = (id === DEFAULT_ADMIN_ID);
 
             if (id) { // Editing existing user
                 let userIndex = users.findIndex(u => u.id === id);
@@ -852,6 +824,12 @@
                             alert('Não é possível desativar o último administrador ativo.');
                             return;
                         }
+                    }
+
+                    // Prevent changing current logged in user to inactive (if not current loggedInUser is the only active admin)
+                    if (id === loggedInUser.id && status === 'inativo') {
+                         alert('Você não pode desativar sua própria conta enquanto estiver logado.');
+                         return;
                     }
 
                     users[userIndex].username = username;
@@ -892,8 +870,8 @@
                 document.getElementById('usuario-senha').value = ''; // Clear password field for security
                 document.getElementById('submit-user-button').textContent = 'Atualizar Usuário';
 
-                // Disable role/status modification for default admin if not current admin
-                if (user.id === 'admin-leandro' && loggedInUser.id !== 'admin-leandro') {
+                // Disable role/status modification for default admin and if not current logged in admin is Leandro
+                if (user.id === DEFAULT_ADMIN_ID) {
                     document.getElementById('usuario-role').disabled = true;
                     document.getElementById('usuario-status').disabled = true;
                 } else {
@@ -909,13 +887,14 @@
             if (!hasPermission('delete', 'usuario')) { alert('Você não tem permissão para excluir usuários.'); return; }
             if (!confirm('Tem certeza que deseja excluir este usuário?')) return;
 
-            if (userId === 'admin-leandro') {
+            if (userId === DEFAULT_ADMIN_ID) {
                 alert('Não é permitido excluir o administrador padrão.');
                 return;
             }
 
             let users = loadData('users');
             const userToDelete = users.find(u => u.id === userId);
+
             if (userToDelete && userToDelete.role === ROLES.ADMINISTRADOR) {
                 const activeAdmins = users.filter(u => u.role === ROLES.ADMINISTRADOR && u.status === 'ativo' && u.id !== userId);
                 if (activeAdmins.length === 0) {
@@ -952,14 +931,23 @@
                 users.forEach(user => {
                     const row = document.createElement('tr');
                     row.className = 'border-b border-gray-200 hover:bg-gray-100';
+                    
+                    let actionsHtml = '';
+                    const canEdit = hasPermission('edit', 'usuario');
+                    const canDelete = hasPermission('delete', 'usuario');
+
+                    if (canEdit) {
+                        actionsHtml += `<button onclick="editUser('${user.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded text-xs mr-2">Editar</button>`;
+                    }
+                    if (canDelete) {
+                        actionsHtml += `<button onclick="deleteUser('${user.id}')" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-xs">Excluir</button>`;
+                    }
+
                     row.innerHTML = `
                         <td class="py-3 px-6 text-left whitespace-nowrap">${user.username}</td>
                         <td class="py-3 px-6 text-left">${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</td>
                         <td class="py-3 px-6 text-left">${user.status.charAt(0).toUpperCase() + user.status.slice(1)}</td>
-                        <td class="py-3 px-6 text-left">
-                            <button onclick="editUser('${user.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded text-xs mr-2 ${!hasPermission('edit', 'usuario') ? 'hidden' : ''}">Editar</button>
-                            <button onclick="deleteUser('${user.id}')" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-xs ${!hasPermission('delete', 'usuario') ? 'hidden' : ''}">Excluir</button>
-                        </td>
+                        <td class="py-3 px-6 text-left">${actionsHtml}</td>
                     `;
                     userList.appendChild(row);
                 });
@@ -1228,7 +1216,17 @@
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 updateUIAccess();
-                showSection('dashboard-section'); // Show dashboard after automatic login
+                // Try to show dashboard, if not permitted, find another permitted page
+                if (hasPermission('view', 'dashboard')) {
+                    showSection('dashboard-section'); 
+                } else if (hasPermission('view', 'entrada')) {
+                    showSection('entrada-veiculo-section');
+                } else if (hasPermission('view', 'consulta-chassi')) {
+                    showSection('consulta-chassi-section');
+                } else {
+                    alert('Você não tem permissão para acessar nenhuma tela. Por favor, contate o administrador.');
+                    handleLogout(); // Force logout if no accessible screen
+                }
                 populateSelects(); // Populate selects for forms
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
