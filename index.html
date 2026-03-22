@@ -53,7 +53,6 @@
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full transition duration-200">Entrar</button>
                 </form>
                 <p id="login-message" class="text-red-500 text-xs italic mt-4 text-center hidden">Credenciais inválidas ou usuário inativo.</p>
-                <button onclick="resetSystem()" class="mt-6 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg w-full transition duration-200">Resetar Sistema</button>
             </div>
             <footer class="bg-gray-800 text-white text-center p-4 text-sm w-full mt-auto">
                 Desenvolvido por Leandro Fernandes
@@ -417,12 +416,13 @@
             if (loadData('movements').length === 0) saveData('movements', []);
         }
 
-        function resetSystem() {
-            if (confirm('Tem certeza que deseja resetar o sistema? Todos os dados serão apagados e o administrador padrão será recriado.')) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
+        // The `resetSystem` function is removed as per the request.
+        // function resetSystem() {
+        //     if (confirm('Tem certeza que deseja resetar o sistema? Todos os dados serão apagados e o administrador padrão será recriado.')) {
+        //         localStorage.clear();
+        //         location.reload();
+        //     }
+        // }
 
         // Access Control
         function hasPermission(action, resource) {
