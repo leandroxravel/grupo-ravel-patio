@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grupo Ravel - Controle de Pátio</title>
+    <title>Controle De Pátio Grupo Ravel</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -24,7 +24,7 @@
         <!-- Login Screen -->
         <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-700 to-indigo-800">
             <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm">
-                <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">Login</h2>
+                <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">Controle De Pátio Grupo Ravel</h2>
                 <form id="login-form" onsubmit="event.preventDefault(); handleLogin();">
                     <div class="mb-4">
                         <label for="username" class="block text-gray-700 text-sm font-semibold mb-2">Usuário</label>
@@ -47,7 +47,7 @@
         <div id="main-app" class="hidden flex-1 flex flex-col">
             <!-- Header/Navbar -->
             <header class="bg-blue-600 p-4 text-white shadow-md flex justify-between items-center sticky top-0 z-30">
-                <h1 class="text-2xl font-bold">Grupo Ravel - Pátio</h1>
+                <h1 class="text-2xl font-bold">Controle De Pátio Grupo Ravel</h1>
                 <button id="menu-button" class="md:hidden focus:outline-none">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
@@ -214,7 +214,7 @@
                                     <option value="inativo">Inativo</option>
                                 </select>
                             </div>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-action-resource="create-edit-usuario" id="submit-user-button">Cadastrar Usuário</button>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200" data-action-resource="create-usuario" id="submit-user-button">Cadastrar Usuário</button>
                             <button type="button" onclick="clearUserForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg ml-2 transition duration-200">Limpar</button>
                         </form>
                         <div class="mt-8">
@@ -323,6 +323,11 @@
                     </section>
                 </main>
             </div>
+
+            <!-- Footer -->
+            <footer class="bg-gray-800 text-white text-center p-4 text-sm">
+                Desenvolvido por Leandro Fernandes
+            </footer>
         </div>
     </div>
 
@@ -444,8 +449,9 @@
             document.querySelectorAll('#sidebar li[data-category-type]').forEach(categoryTitle => {
                 let hasVisibleLink = false;
                 let nextSibling = categoryTitle.nextElementSibling;
+                // Check direct following siblings that are list items until another category title is found or end of list
                 while(nextSibling && nextSibling.tagName === 'LI' && !nextSibling.hasAttribute('data-category-type')) {
-                    if(!nextSibling.classList.contains('hidden')) {
+                    if(!nextSibling.classList.contains('hidden')) { // If any of its child links are visible
                         hasVisibleLink = true;
                         break;
                     }
@@ -461,15 +467,17 @@
             // Form buttons and sections
             document.querySelectorAll('[data-section-resource]').forEach(section => {
                 const resource = section.dataset.sectionResource;
-                // If the user can't even view the section, hide its actions too.
+
+                // Check if the user can even VIEW this section. If not, hide all its action buttons.
                 if (!hasPermission('view', resource)) {
-                     section.querySelectorAll('[data-action-resource]').forEach(button => {
+                    section.querySelectorAll('[data-action-resource]').forEach(button => {
                         button.classList.add('hidden', 'pointer-events-none', 'opacity-50');
                         button.disabled = true;
                     });
-                    return; // No need to check actions if section itself is not visible
+                    return; // No need to check individual actions if the section itself is not viewable
                 }
 
+                // If section is viewable, then check individual action buttons
                 section.querySelectorAll('[data-action-resource]').forEach(button => {
                     const actionResource = button.dataset.actionResource; // e.g., 'create-chassi', 'edit-usuario'
                     const [action, resourceName] = actionResource.split('-');
@@ -485,7 +493,7 @@
 
                 // For 'Gestão de Usuários' table actions, they are rendered dynamically, so update them after renderUsers()
                 if (resource === 'usuario') {
-                    renderUsers(); // Re-render to update edit/delete buttons
+                    renderUsers(); // Re-render to update edit/delete buttons based on permissions
                 }
             });
         }
@@ -504,6 +512,12 @@
                     showSection('entrada-veiculo-section');
                 } else if (loggedInUser && hasPermission('view', 'consulta-chassi')) {
                     showSection('consulta-chassi-section');
+                } else {
+                    // If no accessible sections, force logout
+                    if (loggedInUser) {
+                        alert('Não há seções acessíveis para seu perfil. Saindo da sessão.');
+                        handleLogout();
+                    }
                 }
                 return;
             }
@@ -632,7 +646,17 @@
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 updateUIAccess();
-                showSection('dashboard-section'); // Show dashboard after login
+                // Try to show dashboard, if not permitted, find another permitted page
+                if (hasPermission('view', 'dashboard')) {
+                    showSection('dashboard-section'); 
+                } else if (hasPermission('view', 'entrada')) {
+                    showSection('entrada-veiculo-section');
+                } else if (hasPermission('view', 'consulta-chassi')) {
+                    showSection('consulta-chassi-section');
+                } else {
+                    alert('Você não tem permissão para acessar nenhuma tela. Por favor, contate o administrador.');
+                    handleLogout(); // Force logout if no accessible screen
+                }
                 populateSelects(); // Populate selects for forms
             } else {
                 document.getElementById('login-message').classList.remove('hidden');
@@ -817,7 +841,7 @@
                          alert('Não é permitido desativar o administrador padrão.');
                          return;
                     }
-                    // Prevent disabling last admin
+                    // Prevent disabling last active admin
                     if (status === 'inativo' && role === ROLES.ADMINISTRADOR) {
                         const activeAdmins = users.filter(u => u.role === ROLES.ADMINISTRADOR && u.status === 'ativo' && u.id !== id);
                         if (activeAdmins.length === 0) {
@@ -870,7 +894,7 @@
                 document.getElementById('usuario-senha').value = ''; // Clear password field for security
                 document.getElementById('submit-user-button').textContent = 'Atualizar Usuário';
 
-                // Disable role/status modification for default admin and if not current logged in admin is Leandro
+                // Disable role/status modification for default admin 
                 if (user.id === DEFAULT_ADMIN_ID) {
                     document.getElementById('usuario-role').disabled = true;
                     document.getElementById('usuario-status').disabled = true;
@@ -1224,8 +1248,11 @@
                 } else if (hasPermission('view', 'consulta-chassi')) {
                     showSection('consulta-chassi-section');
                 } else {
-                    alert('Você não tem permissão para acessar nenhuma tela. Por favor, contate o administrador.');
-                    handleLogout(); // Force logout if no accessible screen
+                    // If no accessible sections, force logout
+                    if (loggedInUser) {
+                        alert('Não há seções acessíveis para seu perfil. Saindo da sessão.');
+                        handleLogout();
+                    }
                 }
                 populateSelects(); // Populate selects for forms
             } else {
