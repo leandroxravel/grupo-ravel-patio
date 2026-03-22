@@ -12,7 +12,7 @@
         /* Custom styles for responsive sidebar toggle */
         @media (max-width: 767px) {
             #sidebar.hidden-mobile { display: none; }
-            #sidebar.visible-mobile { display: block; position: fixed; top: 0; left: 0; height: 100%; z-index: 20; width: 80%; max-width: 300px; }
+            #sidebar.visible-mobile { display: block; position: fixed; top: 0; left: 0; height: 100%; z-index: 20; width: 80%; max-width: 300px; background-color: #1a202c; /* Ensure sidebar background for mobile */ }
         }
     </style>
 </head>
@@ -42,7 +42,7 @@
         <!-- Main App Screen (hidden until login) -->
         <div id="main-app" class="hidden flex-1 flex flex-col">
             <!-- Header/Navbar -->
-            <header class="bg-blue-600 p-4 text-white shadow-md flex justify-between items-center z-30">
+            <header class="bg-blue-600 p-4 text-white shadow-md flex justify-between items-center sticky top-0 z-30">
                 <h1 class="text-2xl font-bold">Grupo Ravel - Pátio</h1>
                 <button id="menu-button" class="md:hidden focus:outline-none">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -714,7 +714,7 @@
             const vehicleIndex = vehicles.findIndex(v => v.chassi === chassiNumero && v.patio === patioOrigem);
 
             if (vehicleIndex === -1) {
-                alert('Este veículo não foi encontrado neste pátio.');
+                alert('Este veículo não foi encontrado neste pátio ou já foi registrado como saída.');
                 return;
             }
 
@@ -762,7 +762,7 @@
                 <p class="mb-2"><strong>Marca:</strong> ${chassi.marca}</p>
                 <p class="mb-2"><strong>Modelo:</strong> ${chassi.modelo}</p>
                 <p class="mb-2"><strong>Ano:</strong> ${chassi.ano}</p>
-                <p class="mb-4"><strong>Status Atual:</strong> ${currentVehicleStatus ? `No pátio: ${currentVehicleStatus.patio}` : 'Fora do pátio'}</p>
+                <p class="mb-4"><strong>Status Atual:</strong> ${currentVehicleStatus ? `No pátio: <span class="font-medium">${currentVehicleStatus.patio}</span> desde ${new Date(currentVehicleStatus.entrada).toLocaleString('pt-BR')}` : '<span class="font-medium">Fora do pátio</span>'}</p>
             `;
 
             const movements = loadData('movements').filter(m => m.chassi === chassiNumero);
