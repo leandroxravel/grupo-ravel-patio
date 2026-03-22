@@ -1,1 +1,906 @@
-<h1>Ok</h1>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupo Ravel - Controle de Pátio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        /* Custom styles for responsive sidebar toggle */
+        @media (max-width: 767px) {
+            #sidebar.hidden-mobile { display: none; }
+            #sidebar.visible-mobile { display: block; position: fixed; top: 0; left: 0; height: 100%; z-index: 20; width: 80%; max-width: 300px; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+
+    <div id="app" class="min-h-screen flex flex-col">
+
+        <!-- Login Screen -->
+        <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-700 to-indigo-800">
+            <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm">
+                <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">Login</h2>
+                <form id="login-form" onsubmit="event.preventDefault(); handleLogin();">
+                    <div class="mb-4">
+                        <label for="username" class="block text-gray-700 text-sm font-semibold mb-2">Usuário</label>
+                        <input type="text" id="username" name="username" class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="seu.usuario" value="admin" required>
+                    </div>
+                    <div class="mb-6">
+                        <label for="password" class="block text-gray-700 text-sm font-semibold mb-2">Senha</label>
+                        <input type="password" id="password" name="password" class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="********" value="password" required>
+                    </div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full transition duration-200">Entrar</button>
+                </form>
+                <p id="login-message" class="text-red-500 text-xs italic mt-4 text-center hidden">Credenciais inválidas.</p>
+            </div>
+        </div>
+
+        <!-- Main App Screen (hidden until login) -->
+        <div id="main-app" class="hidden flex-1 flex flex-col">
+            <!-- Header/Navbar -->
+            <header class="bg-blue-600 p-4 text-white shadow-md flex justify-between items-center z-30">
+                <h1 class="text-2xl font-bold">Grupo Ravel - Pátio</h1>
+                <button id="menu-button" class="md:hidden focus:outline-none">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <div class="hidden md:flex items-center space-x-4">
+                    <span class="text-sm italic">Bem-vindo, <span id="logged-in-user" class="font-medium"></span></span>
+                    <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">Sair</button>
+                </div>
+            </header>
+
+            <div class="flex flex-1 relative">
+                <!-- Sidebar -->
+                <aside id="sidebar" class="w-64 bg-blue-700 text-white p-4 hidden-mobile md:block shadow-lg md:relative absolute">
+                    <nav>
+                        <ul class="space-y-2">
+                            <li><a href="#" onclick="showSection('dashboard-section')" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Dashboard</a></li>
+                            <li class="font-semibold mt-4 text-blue-200">Cadastros</li>
+                            <li><a href="#" onclick="showSection('cadastro-chassi-section')" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Chassi</a></li>
+                            <li><a href="#" onclick="showSection('cadastro-modelo-section')" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Modelo</a></li>
+                            <li><a href="#" onclick="showSection('cadastro-patios-section')" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Pátios</a></li>
+                            <li><a href="#" onclick="showSection('cadastro-usuarios-section')" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Usuários</a></li>
+                            <li class="font-semibold mt-4 text-blue-200">Movimentações</li>
+                            <li><a href="#" onclick="showSection('entrada-veiculo-section')" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Entrada de Veículo</a></li>
+                            <li><a href="#" onclick="showSection('saida-veiculo-section')" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Saída de Veículo</a></li>
+                            <li class="font-semibold mt-4 text-blue-200">Relatórios</li>
+                            <li><a href="#" onclick="showSection('consulta-chassi-section')" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Consulta por Chassi</a></li>
+                            <li><a href="#" onclick="showSection('historico-movimentacao-section')" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Histórico de Movimentação</a></li>
+                            <li class="mt-4 md:hidden">
+                                <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md w-full text-sm">Sair</button>
+                            </li>
+                        </ul>
+                    </nav>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+                    <!-- Dashboard Section -->
+                    <section id="dashboard-section" class="page-section active bg-white p-6 rounded-lg shadow-md mb-4">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Dashboard</h2>
+                        <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    </section>
+
+                    <!-- Cadastro Chassi Section -->
+                    <section id="cadastro-chassi-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Cadastro de Chassi</h2>
+                        <form id="chassi-form" onsubmit="event.preventDefault(); handleSubmitChassi();" class="space-y-4">
+                            <div>
+                                <label for="chassi-numero" class="block text-gray-700 text-sm font-semibold mb-2">Número do Chassi</label>
+                                <input type="text" id="chassi-numero" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <div>
+                                <label for="chassi-marca" class="block text-gray-700 text-sm font-semibold mb-2">Marca</label>
+                                <input type="text" id="chassi-marca" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <div>
+                                <label for="chassi-modelo-select" class="block text-gray-700 text-sm font-semibold mb-2">Modelo</label>
+                                <select id="chassi-modelo-select" class="form-select w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                                    <option value="">Selecione um modelo</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="chassi-ano" class="block text-gray-700 text-sm font-semibold mb-2">Ano</label>
+                                <input type="number" id="chassi-ano" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" min="1900" max="2100" required>
+                            </div>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">Cadastrar Chassi</button>
+                        </form>
+                        <div class="mt-8">
+                            <h3 class="text-xl font-bold mb-4">Chassis Cadastrados</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200">
+                                    <thead>
+                                        <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                                            <th class="py-3 px-6 text-left">Número</th>
+                                            <th class="py-3 px-6 text-left">Marca</th>
+                                            <th class="py-3 px-6 text-left">Modelo</th>
+                                            <th class="py-3 px-6 text-left">Ano</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="chassi-list" class="text-gray-600 text-sm font-light"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Cadastro Modelo Section -->
+                    <section id="cadastro-modelo-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Cadastro de Modelo</h2>
+                        <form id="modelo-form" onsubmit="event.preventDefault(); handleSubmitModelo();" class="space-y-4">
+                            <div>
+                                <label for="modelo-nome" class="block text-gray-700 text-sm font-semibold mb-2">Nome do Modelo</label>
+                                <input type="text" id="modelo-nome" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <div>
+                                <label for="modelo-marca" class="block text-gray-700 text-sm font-semibold mb-2">Marca</label>
+                                <input type="text" id="modelo-marca" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">Cadastrar Modelo</button>
+                        </form>
+                        <div class="mt-8">
+                            <h3 class="text-xl font-bold mb-4">Modelos Cadastrados</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200">
+                                    <thead>
+                                        <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                                            <th class="py-3 px-6 text-left">Nome</th>
+                                            <th class="py-3 px-6 text-left">Marca</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modelo-list" class="text-gray-600 text-sm font-light"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Cadastro Patios Section -->
+                    <section id="cadastro-patios-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Cadastro de Pátios</h2>
+                        <form id="patio-form" onsubmit="event.preventDefault(); handleSubmitPatio();" class="space-y-4">
+                            <div>
+                                <label for="patio-nome" class="block text-gray-700 text-sm font-semibold mb-2">Nome do Pátio</label>
+                                <input type="text" id="patio-nome" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">Cadastrar Pátio</button>
+                        </form>
+                        <div class="mt-8">
+                            <h3 class="text-xl font-bold mb-4">Pátios Cadastrados</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200">
+                                    <thead>
+                                        <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                                            <th class="py-3 px-6 text-left">Nome</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="patio-list" class="text-gray-600 text-sm font-light"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Cadastro Usuarios Section -->
+                    <section id="cadastro-usuarios-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Cadastro de Usuários</h2>
+                        <form id="usuario-form" onsubmit="event.preventDefault(); handleSubmitUsuario();" class="space-y-4">
+                            <div>
+                                <label for="usuario-nome" class="block text-gray-700 text-sm font-semibold mb-2">Nome de Usuário</label>
+                                <input type="text" id="usuario-nome" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <div>
+                                <label for="usuario-senha" class="block text-gray-700 text-sm font-semibold mb-2">Senha</label>
+                                <input type="password" id="usuario-senha" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <div>
+                                <label for="usuario-role" class="block text-gray-700 text-sm font-semibold mb-2">Função</label>
+                                <select id="usuario-role" class="form-select w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                                    <option value="admin">Administrador</option>
+                                    <option value="operador">Operador</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">Cadastrar Usuário</button>
+                        </form>
+                        <div class="mt-8">
+                            <h3 class="text-xl font-bold mb-4">Usuários Cadastrados</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200">
+                                    <thead>
+                                        <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                                            <th class="py-3 px-6 text-left">Usuário</th>
+                                            <th class="py-3 px-6 text-left">Função</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usuario-list" class="text-gray-600 text-sm font-light"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Entrada Veiculo Section -->
+                    <section id="entrada-veiculo-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Entrada de Veículo</h2>
+                        <form id="entrada-form" onsubmit="event.preventDefault(); handleSubmitEntrada();" class="space-y-4">
+                            <div>
+                                <label for="entrada-chassi" class="block text-gray-700 text-sm font-semibold mb-2">Número do Chassi</label>
+                                <select id="entrada-chassi" class="form-select w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                                    <option value="">Selecione um chassi</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="entrada-patio" class="block text-gray-700 text-sm font-semibold mb-2">Pátio de Destino</label>
+                                <select id="entrada-patio" class="form-select w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                                    <option value="">Selecione um pátio</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="entrada-observacoes" class="block text-gray-700 text-sm font-semibold mb-2">Observações</label>
+                                <textarea id="entrada-observacoes" rows="3" class="form-textarea w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                            <div>
+                                <label for="entrada-avarias" class="block text-gray-700 text-sm font-semibold mb-2">Avarias (se houver)</label>
+                                <textarea id="entrada-avarias" rows="3" class="form-textarea w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                            <div>
+                                <label for="entrada-foto" class="block text-gray-700 text-sm font-semibold mb-2">Upload de Foto (simulado)</label>
+                                <input type="file" id="entrada-foto" accept="image/*" class="form-input w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">Registrar Entrada</button>
+                        </form>
+                    </section>
+
+                    <!-- Saida Veiculo Section -->
+                    <section id="saida-veiculo-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Saída de Veículo</h2>
+                        <form id="saida-form" onsubmit="event.preventDefault(); handleSubmitSaida();" class="space-y-4">
+                            <div>
+                                <label for="saida-chassi" class="block text-gray-700 text-sm font-semibold mb-2">Número do Chassi</label>
+                                <select id="saida-chassi" class="form-select w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                                    <option value="">Selecione um chassi</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="saida-patio" class="block text-gray-700 text-sm font-semibold mb-2">Pátio de Origem</label>
+                                <select id="saida-patio" class="form-select w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
+                                    <option value="">Selecione um pátio</option>
+                                </select>
+                            </div>
+                             <div>
+                                <label for="saida-observacoes" class="block text-gray-700 text-sm font-semibold mb-2">Observações de Saída</label>
+                                <textarea id="saida-observacoes" rows="3" class="form-textarea w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">Registrar Saída</button>
+                        </form>
+                    </section>
+
+                    <!-- Consulta Chassi Section -->
+                    <section id="consulta-chassi-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Consulta por Chassi</h2>
+                        <form onsubmit="event.preventDefault(); handleConsultaChassi();" class="mb-4 flex space-x-2">
+                            <input type="text" id="consulta-chassi-input" class="form-input flex-1 p-2 border rounded focus:ring-blue-500 focus:border-blue-500" placeholder="Digite o número do chassi" required>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">Consultar</button>
+                        </form>
+                        <div id="consulta-chassi-results" class="mt-4"></div>
+                    </section>
+
+                    <!-- Historico Movimentacao Section -->
+                    <section id="historico-movimentacao-section" class="page-section bg-white p-6 rounded-lg shadow-md mb-4">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Histórico de Movimentação</h2>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white border border-gray-200">
+                                <thead>
+                                    <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                                        <th class="py-3 px-6 text-left">Tipo</th>
+                                        <th class="py-3 px-6 text-left">Chassi</th>
+                                        <th class="py-3 px-6 text-left">Pátio</th>
+                                        <th class="py-3 px-6 text-left">Data/Hora</th>
+                                        <th class="py-3 px-6 text-left">Observações</th>
+                                        <th class="py-3 px-6 text-left">Avarias</th>
+                                        <th class="py-3 px-6 text-left">Foto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historico-list" class="text-gray-600 text-sm font-light"></tbody>
+                            </table>
+                        </div>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const LS_PREFIX = 'grupo_ravel_patio_';
+
+        // Helper functions for localStorage
+        function saveData(key, data) {
+            localStorage.setItem(LS_PREFIX + key, JSON.stringify(data));
+        }
+
+        function loadData(key) {
+            const data = localStorage.getItem(LS_PREFIX + key);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function initializeLocalStorage() {
+            if (!localStorage.getItem(LS_PREFIX + 'users')) {
+                saveData('users', [{ username: 'admin', password: 'password', role: 'admin' }]);
+            }
+            if (!localStorage.getItem(LS_PREFIX + 'chassis')) {
+                saveData('chassis', []);
+            }
+            if (!localStorage.getItem(LS_PREFIX + 'models')) {
+                saveData('models', []);
+            }
+            if (!localStorage.getItem(LS_PREFIX + 'yards')) {
+                saveData('yards', []);
+            }
+            if (!localStorage.getItem(LS_PREFIX + 'vehicles')) { // Vehicles currently in a yard
+                saveData('vehicles', []); 
+            }
+            if (!localStorage.getItem(LS_PREFIX + 'movements')) { // Historical records of entry/exit
+                saveData('movements', []);
+            }
+            if (!localStorage.getItem(LS_PREFIX + 'loggedInUser')) {
+                localStorage.setItem(LS_PREFIX + 'loggedInUser', '');
+            }
+        }
+
+        // UI State Management
+        function showSection(sectionId) {
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                // Re-render data for the newly active section if it's a list/dashboard
+                if (sectionId === 'dashboard-section') renderDashboard();
+                if (sectionId === 'cadastro-chassi-section') renderChassis();
+                if (sectionId === 'cadastro-modelo-section') renderModels();
+                if (sectionId === 'cadastro-patios-section') renderYards();
+                if (sectionId === 'cadastro-usuarios-section') renderUsers();
+                if (sectionId === 'historico-movimentacao-section') renderHistorico();
+
+                // For forms that require select options, populate them
+                if (['cadastro-chassi-section', 'entrada-veiculo-section', 'saida-veiculo-section'].includes(sectionId)) {
+                    populateSelects();
+                }
+            }
+            // Close mobile sidebar if open
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('visible-mobile')) {
+                sidebar.classList.remove('visible-mobile');
+                sidebar.classList.add('hidden-mobile');
+            }
+        }
+
+        function populateSelects() {
+            const chassis = loadData('chassis');
+            const models = loadData('models');
+            const yards = loadData('yards');
+
+            // Populate chassi-modelo-select (for cadastro chassi)
+            const chassiModeloSelect = document.getElementById('chassi-modelo-select');
+            if (chassiModeloSelect) {
+                chassiModeloSelect.innerHTML = '<option value="">Selecione um modelo</option>';
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.nome;
+                    option.textContent = model.nome + ' (' + model.marca + ')';
+                    chassiModeloSelect.appendChild(option);
+                });
+            }
+
+            // Populate entrada-chassi
+            const entradaChassiSelect = document.getElementById('entrada-chassi');
+            if (entradaChassiSelect) {
+                entradaChassiSelect.innerHTML = '<option value="">Selecione um chassi</option>';
+                // Only show chassis not currently in a yard for entry
+                const vehiclesInYard = loadData('vehicles').map(v => v.chassi);
+                chassis.filter(c => !vehiclesInYard.includes(c.numero)).forEach(chassi => {
+                    const option = document.createElement('option');
+                    option.value = chassi.numero;
+                    option.textContent = chassi.numero + ' (' + chassi.marca + ' ' + chassi.modelo + ')';
+                    entradaChassiSelect.appendChild(option);
+                });
+            }
+
+            // Populate saida-chassi
+            const saidaChassiSelect = document.getElementById('saida-chassi');
+            if (saidaChassiSelect) {
+                saidaChassiSelect.innerHTML = '<option value="">Selecione um chassi</option>';
+                // Only show chassis currently in a yard for exit
+                const vehiclesInYard = loadData('vehicles');
+                vehiclesInYard.forEach(vehicle => {
+                    const option = document.createElement('option');
+                    option.value = vehicle.chassi;
+                    option.textContent = vehicle.chassi + ' (Pátio: ' + vehicle.patio + ')';
+                    saidaChassiSelect.appendChild(option);
+                });
+            }
+
+            // Populate entrada-patio and saida-patio
+            const entradaPatioSelect = document.getElementById('entrada-patio');
+            const saidaPatioSelect = document.getElementById('saida-patio');
+            if (entradaPatioSelect) {
+                entradaPatioSelect.innerHTML = '<option value="">Selecione um pátio</option>';
+                yards.forEach(yard => {
+                    const option = document.createElement('option');
+                    option.value = yard.nome;
+                    option.textContent = yard.nome;
+                    entradaPatioSelect.appendChild(option);
+                });
+            }
+            if (saidaPatioSelect) {
+                saidaPatioSelect.innerHTML = '<option value="">Selecione um pátio</option>';
+                yards.forEach(yard => {
+                    const option = document.createElement('option');
+                    option.value = yard.nome;
+                    option.textContent = yard.nome;
+                    saidaPatioSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Login/Logout
+        function handleLogin() {
+            const usernameInput = document.getElementById('username').value;
+            const passwordInput = document.getElementById('password').value;
+            const users = loadData('users');
+            const user = users.find(u => u.username === usernameInput && u.password === passwordInput);
+
+            if (user) {
+                localStorage.setItem(LS_PREFIX + 'loggedInUser', user.username);
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('logged-in-user').textContent = user.username;
+                showSection('dashboard-section'); // Show dashboard after login
+                populateSelects(); // Populate selects for forms
+            } else {
+                document.getElementById('login-message').classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem(LS_PREFIX + 'loggedInUser');
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('login-message').classList.add('hidden');
+            document.getElementById('username').value = 'admin'; // Reset for convenience
+            document.getElementById('password').value = 'password'; // Reset for convenience
+        }
+
+        // Cadastro Functions
+        function handleSubmitChassi() {
+            const numero = document.getElementById('chassi-numero').value.toUpperCase().trim();
+            const marca = document.getElementById('chassi-marca').value.trim();
+            const modelo = document.getElementById('chassi-modelo-select').value.trim();
+            const ano = document.getElementById('chassi-ano').value.trim();
+
+            if (!numero || !marca || !modelo || !ano) {
+                alert('Por favor, preencha todos os campos do chassi.');
+                return;
+            }
+
+            const chassis = loadData('chassis');
+            if (chassis.some(c => c.numero === numero)) {
+                alert('Chassi já cadastrado!');
+                return;
+            }
+
+            chassis.push({ numero, marca, modelo, ano: parseInt(ano) });
+            saveData('chassis', chassis);
+            alert('Chassi cadastrado com sucesso!');
+            document.getElementById('chassi-form').reset();
+            renderChassis();
+            populateSelects(); // Update selects where chassis are used
+        }
+
+        function renderChassis() {
+            const chassis = loadData('chassis');
+            const chassiList = document.getElementById('chassi-list');
+            if (chassiList) {
+                chassiList.innerHTML = '';
+                chassis.forEach(chassi => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-200 hover:bg-gray-100';
+                    row.innerHTML = `
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${chassi.numero}</td>
+                        <td class="py-3 px-6 text-left">${chassi.marca}</td>
+                        <td class="py-3 px-6 text-left">${chassi.modelo}</td>
+                        <td class="py-3 px-6 text-left">${chassi.ano}</td>
+                    `;
+                    chassiList.appendChild(row);
+                });
+            }
+        }
+
+        function handleSubmitModelo() {
+            const nome = document.getElementById('modelo-nome').value.trim();
+            const marca = document.getElementById('modelo-marca').value.trim();
+
+            if (!nome || !marca) {
+                alert('Por favor, preencha todos os campos do modelo.');
+                return;
+            }
+
+            const models = loadData('models');
+            if (models.some(m => m.nome.toLowerCase() === nome.toLowerCase() && m.marca.toLowerCase() === marca.toLowerCase())) {
+                alert('Modelo com esta marca já cadastrado!');
+                return;
+            }
+
+            models.push({ nome, marca });
+            saveData('models', models);
+            alert('Modelo cadastrado com sucesso!');
+            document.getElementById('modelo-form').reset();
+            renderModels();
+            populateSelects(); // Update selects where models are used
+        }
+
+        function renderModels() {
+            const models = loadData('models');
+            const modelList = document.getElementById('modelo-list');
+            if (modelList) {
+                modelList.innerHTML = '';
+                models.forEach(model => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-200 hover:bg-gray-100';
+                    row.innerHTML = `
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${model.nome}</td>
+                        <td class="py-3 px-6 text-left">${model.marca}</td>
+                    `;
+                    modelList.appendChild(row);
+                });
+            }
+        }
+
+        function handleSubmitPatio() {
+            const nome = document.getElementById('patio-nome').value.trim();
+
+            if (!nome) {
+                alert('Por favor, preencha o nome do pátio.');
+                return;
+            }
+
+            const yards = loadData('yards');
+            if (yards.some(y => y.nome.toLowerCase() === nome.toLowerCase())) {
+                alert('Pátio com este nome já cadastrado!');
+                return;
+            }
+
+            yards.push({ nome });
+            saveData('yards', yards);
+            alert('Pátio cadastrado com sucesso!');
+            document.getElementById('patio-form').reset();
+            renderYards();
+            populateSelects(); // Update selects where yards are used
+        }
+
+        function renderYards() {
+            const yards = loadData('yards');
+            const yardList = document.getElementById('patio-list');
+            if (yardList) {
+                yardList.innerHTML = '';
+                yards.forEach(yard => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-200 hover:bg-gray-100';
+                    row.innerHTML = `
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${yard.nome}</td>
+                    `;
+                    yardList.appendChild(row);
+                });
+            }
+        }
+
+        function handleSubmitUsuario() {
+            const username = document.getElementById('usuario-nome').value.trim();
+            const password = document.getElementById('usuario-senha').value.trim();
+            const role = document.getElementById('usuario-role').value.trim();
+
+            if (!username || !password || !role) {
+                alert('Por favor, preencha todos os campos do usuário.');
+                return;
+            }
+
+            const users = loadData('users');
+            if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+                alert('Usuário com este nome já cadastrado!');
+                return;
+            }
+
+            users.push({ username, password, role });
+            saveData('users', users);
+            alert('Usuário cadastrado com sucesso!');
+            document.getElementById('usuario-form').reset();
+            renderUsers();
+        }
+
+        function renderUsers() {
+            const users = loadData('users');
+            const userList = document.getElementById('usuario-list');
+            if (userList) {
+                userList.innerHTML = '';
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-200 hover:bg-gray-100';
+                    row.innerHTML = `
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${user.username}</td>
+                        <td class="py-3 px-6 text-left">${user.role}</td>
+                    `;
+                    userList.appendChild(row);
+                });
+            }
+        }
+
+        // Movimentação Functions
+        function handleSubmitEntrada() {
+            const chassiNumero = document.getElementById('entrada-chassi').value;
+            const patioNome = document.getElementById('entrada-patio').value;
+            const observacoes = document.getElementById('entrada-observacoes').value.trim();
+            const avarias = document.getElementById('entrada-avarias').value.trim();
+            const fotoInput = document.getElementById('entrada-foto');
+            let fotoData = '';
+
+            if (!chassiNumero || !patioNome) {
+                alert('Por favor, selecione o chassi e o pátio.');
+                return;
+            }
+
+            const vehicles = loadData('vehicles');
+            if (vehicles.some(v => v.chassi === chassiNumero)) {
+                alert('Este chassi já está em um pátio!');
+                return;
+            }
+
+            // Simulate photo upload by converting to base64 or just storing file name
+            if (fotoInput.files.length > 0) {
+                const file = fotoInput.files[0];
+                if (file.size > 1024 * 1024) { // Limit to 1MB for demo
+                    alert('A imagem é muito grande. Por favor, selecione uma imagem menor (máx 1MB).');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fotoData = e.target.result;
+                    processEntrada(chassiNumero, patioNome, observacoes, avarias, fotoData);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                processEntrada(chassiNumero, patioNome, observacoes, avarias, fotoData);
+            }
+        }
+
+        function processEntrada(chassiNumero, patioNome, observacoes, avarias, fotoData) {
+            const vehicles = loadData('vehicles');
+            vehicles.push({
+                chassi: chassiNumero,
+                patio: patioNome,
+                entrada: new Date().toISOString(),
+            });
+            saveData('vehicles', vehicles);
+
+            const movements = loadData('movements');
+            movements.push({
+                type: 'entrada',
+                chassi: chassiNumero,
+                patio: patioNome,
+                timestamp: new Date().toISOString(),
+                observacoes,
+                avarias,
+                foto: fotoData // Store base64 string or file name
+            });
+            saveData('movements', movements);
+
+            alert('Entrada de veículo registrada com sucesso!');
+            document.getElementById('entrada-form').reset();
+            populateSelects();
+            renderDashboard();
+        }
+
+        function handleSubmitSaida() {
+            const chassiNumero = document.getElementById('saida-chassi').value;
+            const patioOrigem = document.getElementById('saida-patio').value;
+            const observacoes = document.getElementById('saida-observacoes').value.trim();
+
+            if (!chassiNumero || !patioOrigem) {
+                alert('Por favor, selecione o chassi e o pátio de origem.');
+                return;
+            }
+
+            let vehicles = loadData('vehicles');
+            const vehicleIndex = vehicles.findIndex(v => v.chassi === chassiNumero && v.patio === patioOrigem);
+
+            if (vehicleIndex === -1) {
+                alert('Este veículo não foi encontrado neste pátio.');
+                return;
+            }
+
+            // Remove vehicle from current status
+            vehicles.splice(vehicleIndex, 1);
+            saveData('vehicles', vehicles);
+
+            // Record movement history
+            const movements = loadData('movements');
+            movements.push({
+                type: 'saida',
+                chassi: chassiNumero,
+                patio: patioOrigem,
+                timestamp: new Date().toISOString(),
+                observacoes,
+                avarias: '' // Avarias are typically recorded on entry
+            });
+            saveData('movements', movements);
+
+            alert('Saída de veículo registrada com sucesso!');
+            document.getElementById('saida-form').reset();
+            populateSelects();
+            renderDashboard();
+        }
+
+        // Relatórios Functions
+        function handleConsultaChassi() {
+            const chassiNumero = document.getElementById('consulta-chassi-input').value.toUpperCase().trim();
+            const resultsDiv = document.getElementById('consulta-chassi-results');
+            resultsDiv.innerHTML = '';
+
+            const chassis = loadData('chassis');
+            const chassi = chassis.find(c => c.numero === chassiNumero);
+
+            if (!chassi) {
+                resultsDiv.innerHTML = '<p class="text-red-500">Chassi não encontrado.</p>';
+                return;
+            }
+
+            const vehicles = loadData('vehicles');
+            const currentVehicleStatus = vehicles.find(v => v.chassi === chassiNumero);
+
+            let html = `
+                <h3 class="text-xl font-bold mb-4">Detalhes do Chassi: ${chassi.numero}</h3>
+                <p class="mb-2"><strong>Marca:</strong> ${chassi.marca}</p>
+                <p class="mb-2"><strong>Modelo:</strong> ${chassi.modelo}</p>
+                <p class="mb-2"><strong>Ano:</strong> ${chassi.ano}</p>
+                <p class="mb-4"><strong>Status Atual:</strong> ${currentVehicleStatus ? `No pátio: ${currentVehicleStatus.patio}` : 'Fora do pátio'}</p>
+            `;
+
+            const movements = loadData('movements').filter(m => m.chassi === chassiNumero);
+
+            if (movements.length > 0) {
+                html += `<h4 class="text-lg font-bold mt-6 mb-4">Histórico de Movimentação:</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white border border-gray-200">
+                                <thead>
+                                    <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                                        <th class="py-3 px-6 text-left">Tipo</th>
+                                        <th class="py-3 px-6 text-left">Pátio</th>
+                                        <th class="py-3 px-6 text-left">Data/Hora</th>
+                                        <th class="py-3 px-6 text-left">Observações</th>
+                                        <th class="py-3 px-6 text-left">Avarias</th>
+                                        <th class="py-3 px-6 text-left">Foto</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-gray-600 text-sm font-light">`;
+                movements.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Latest first
+                movements.forEach(movement => {
+                    const date = new Date(movement.timestamp).toLocaleString('pt-BR');
+                    const fotoHtml = movement.foto ? `<img src="${movement.foto}" alt="Foto do Veículo" class="w-16 h-12 object-cover rounded-md" onclick="window.open('${movement.foto}', '_blank')" style="cursor:pointer;">` : 'N/A';
+                    html += `
+                        <tr class="border-b border-gray-200 hover:bg-gray-100">
+                            <td class="py-3 px-6 text-left whitespace-nowrap">${movement.type === 'entrada' ? 'Entrada' : 'Saída'}</td>
+                            <td class="py-3 px-6 text-left">${movement.patio}</td>
+                            <td class="py-3 px-6 text-left">${date}</td>
+                            <td class="py-3 px-6 text-left">${movement.observacoes || 'N/A'}</td>
+                            <td class="py-3 px-6 text-left">${movement.avarias || 'N/A'}</td>
+                            <td class="py-3 px-6 text-left">${fotoHtml}</td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table></div>`;
+            } else {
+                html += '<p class="mt-4 text-gray-600">Nenhuma movimentação encontrada para este chassi.</p>';
+            }
+            resultsDiv.innerHTML = html;
+        }
+
+        function renderHistorico() {
+            const movements = loadData('movements');
+            const historicoList = document.getElementById('historico-list');
+            if (historicoList) {
+                historicoList.innerHTML = '';
+                movements.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Latest first
+                movements.forEach(movement => {
+                    const date = new Date(movement.timestamp).toLocaleString('pt-BR');
+                    const fotoHtml = movement.foto ? `<img src="${movement.foto}" alt="Foto do Veículo" class="w-16 h-12 object-cover rounded-md" onclick="window.open('${movement.foto}', '_blank')" style="cursor:pointer;">` : 'N/A';
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-200 hover:bg-gray-100';
+                    row.innerHTML = `
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${movement.type === 'entrada' ? 'Entrada' : 'Saída'}</td>
+                        <td class="py-3 px-6 text-left">${movement.chassi}</td>
+                        <td class="py-3 px-6 text-left">${movement.patio}</td>
+                        <td class="py-3 px-6 text-left">${date}</td>
+                        <td class="py-3 px-6 text-left">${movement.observacoes || 'N/A'}</td>
+                        <td class="py-3 px-6 text-left">${movement.avarias || 'N/A'}</td>
+                        <td class="py-3 px-6 text-left">${fotoHtml}</td>
+                    `;
+                    historicoList.appendChild(row);
+                });
+            }
+        }
+
+        // Dashboard Function
+        function renderDashboard() {
+            const vehicles = loadData('vehicles');
+            const yards = loadData('yards');
+            const dashboardContent = document.getElementById('dashboard-content');
+            if (dashboardContent) {
+                dashboardContent.innerHTML = '';
+
+                if (yards.length === 0) {
+                    dashboardContent.innerHTML = '<p class="text-gray-600">Nenhum pátio cadastrado. Cadastre pátios para ver o dashboard.</p>';
+                    return;
+                }
+
+                const countsByYard = {};
+                yards.forEach(yard => countsByYard[yard.nome] = 0);
+                vehicles.forEach(vehicle => {
+                    if (countsByYard[vehicle.patio] !== undefined) {
+                        countsByYard[vehicle.patio]++;
+                    }
+                });
+
+                // Total vehicles in all yards
+                const totalVehicles = vehicles.length;
+                let totalCard = document.createElement('div');
+                totalCard.className = 'bg-indigo-100 p-6 rounded-lg shadow-md flex items-center justify-between';
+                totalCard.innerHTML = `
+                    <div>
+                        <p class="text-sm text-indigo-800">Total de Veículos nos Pátios</p>
+                        <h3 class="text-3xl font-bold text-indigo-900">${totalVehicles}</h3>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                `;
+                dashboardContent.appendChild(totalCard);
+
+                for (const yardName in countsByYard) {
+                    const card = document.createElement('div');
+                    card.className = 'bg-blue-100 p-6 rounded-lg shadow-md flex items-center justify-between';
+                    card.innerHTML = `
+                        <div>
+                            <p class="text-sm text-blue-800">Veículos em</p>
+                            <h3 class="text-xl font-bold text-blue-900">${yardName}</h3>
+                        </div>
+                        <span class="text-4xl font-extrabold text-blue-600">${countsByYard[yardName]}</span>
+                    `;
+                    dashboardContent.appendChild(card);
+                }
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLocalStorage();
+            // Check if logged in on page load
+            const loggedInUser = localStorage.getItem(LS_PREFIX + 'loggedInUser');
+            if (loggedInUser) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('logged-in-user').textContent = loggedInUser;
+                showSection('dashboard-section'); // Show dashboard after automatic login
+                populateSelects(); // Populate selects for forms
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('menu-button').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden-mobile');
+            sidebar.classList.toggle('visible-mobile');
+        });
+
+    </script>
+</body>
+</html>
