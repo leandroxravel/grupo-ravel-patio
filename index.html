@@ -12,7 +12,8 @@
         /* Custom styles for responsive sidebar toggle */
         @media (max-width: 767px) {
             #sidebar.hidden-mobile { display: none; }
-            #sidebar.visible-mobile { display: block; position: fixed; top: 0; left: 0; height: 100%; z-index: 20; width: 80%; max-width: 300px; background-color: #1a202c; /* Ensure sidebar background for mobile */ }
+            #sidebar.visible-mobile { display: block; position: fixed; top: 0; left: 0; height: 100%; z-index: 20; width: 80%; max-width: 300px; background-color: #1a202c; /* Ensure sidebar background for mobile */ overflow-y: auto; }
+            main { padding-top: 5rem; /* Adjust for fixed header */ }
         }
     </style>
 </head>
@@ -263,8 +264,8 @@
                             </div>
                             <div>
                                 <label for="saida-patio" class="block text-gray-700 text-sm font-semibold mb-2">Pátio de Origem</label>
-                                <select id="saida-patio" class="form-select w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required>
-                                    <option value="">Selecione um pátio</option>
+                                <select id="saida-patio" class="form-select w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" required disabled>
+                                    <option value="">Pátio atual do veículo</option>
                                 </select>
                             </div>
                              <div>
@@ -380,6 +381,7 @@
             const chassis = loadData('chassis');
             const models = loadData('models');
             const yards = loadData('yards');
+            const vehicles = loadData('vehicles');
 
             // Populate chassi-modelo-select (for cadastro chassi)
             const chassiModeloSelect = document.getElementById('chassi-modelo-select');
@@ -398,8 +400,8 @@
             if (entradaChassiSelect) {
                 entradaChassiSelect.innerHTML = '<option value="">Selecione um chassi</option>';
                 // Only show chassis not currently in a yard for entry
-                const vehiclesInYard = loadData('vehicles').map(v => v.chassi);
-                chassis.filter(c => !vehiclesInYard.includes(c.numero)).forEach(chassi => {
+                const chassisInYard = vehicles.map(v => v.chassi);
+                chassis.filter(c => !chassisInYard.includes(c.numero)).forEach(chassi => {
                     const option = document.createElement('option');
                     option.value = chassi.numero;
                     option.textContent = chassi.numero + ' (' + chassi.marca + ' ' + chassi.modelo + ')';
@@ -409,21 +411,44 @@
 
             // Populate saida-chassi
             const saidaChassiSelect = document.getElementById('saida-chassi');
+            const saidaPatioSelect = document.getElementById('saida-patio');
             if (saidaChassiSelect) {
                 saidaChassiSelect.innerHTML = '<option value="">Selecione um chassi</option>';
                 // Only show chassis currently in a yard for exit
-                const vehiclesInYard = loadData('vehicles');
-                vehiclesInYard.forEach(vehicle => {
+                vehicles.forEach(vehicle => {
                     const option = document.createElement('option');
                     option.value = vehicle.chassi;
                     option.textContent = vehicle.chassi + ' (Pátio: ' + vehicle.patio + ')';
                     saidaChassiSelect.appendChild(option);
                 });
+
+                // Event listener to update saida-patio based on selected chassi
+                saidaChassiSelect.onchange = () => {
+                    const selectedChassi = saidaChassiSelect.value;
+                    saidaPatioSelect.innerHTML = '<option value="">Pátio atual do veículo</option>';
+                    saidaPatioSelect.disabled = true;
+                    if (selectedChassi) {
+                        const vehicle = vehicles.find(v => v.chassi === selectedChassi);
+                        if (vehicle) {
+                            const option = document.createElement('option');
+                            option.value = vehicle.patio;
+                            option.textContent = vehicle.patio;
+                            option.selected = true;
+                            saidaPatioSelect.appendChild(option);
+                        }
+                    }
+                };
+                // Trigger onchange immediately if a value is pre-selected (e.g., after a submission that resets the form, but not in this simple case)
+                if (saidaChassiSelect.value) {
+                    saidaChassiSelect.onchange();
+                } else {
+                    saidaPatioSelect.innerHTML = '<option value="">Pátio atual do veículo</option>';
+                    saidaPatioSelect.disabled = true;
+                }
             }
 
-            // Populate entrada-patio and saida-patio
+            // Populate entrada-patio
             const entradaPatioSelect = document.getElementById('entrada-patio');
-            const saidaPatioSelect = document.getElementById('saida-patio');
             if (entradaPatioSelect) {
                 entradaPatioSelect.innerHTML = '<option value="">Selecione um pátio</option>';
                 yards.forEach(yard => {
@@ -431,15 +456,6 @@
                     option.value = yard.nome;
                     option.textContent = yard.nome;
                     entradaPatioSelect.appendChild(option);
-                });
-            }
-            if (saidaPatioSelect) {
-                saidaPatioSelect.innerHTML = '<option value="">Selecione um pátio</option>';
-                yards.forEach(yard => {
-                    const option = document.createElement('option');
-                    option.value = yard.nome;
-                    option.textContent = yard.nome;
-                    saidaPatioSelect.appendChild(option);
                 });
             }
         }
@@ -702,11 +718,11 @@
 
         function handleSubmitSaida() {
             const chassiNumero = document.getElementById('saida-chassi').value;
-            const patioOrigem = document.getElementById('saida-patio').value;
+            const patioOrigem = document.getElementById('saida-patio').value; // This will be pre-filled from populateSelects
             const observacoes = document.getElementById('saida-observacoes').value.trim();
 
             if (!chassiNumero || !patioOrigem) {
-                alert('Por favor, selecione o chassi e o pátio de origem.');
+                alert('Por favor, selecione o chassi.');
                 return;
             }
 
@@ -837,20 +853,6 @@
             if (dashboardContent) {
                 dashboardContent.innerHTML = '';
 
-                if (yards.length === 0) {
-                    dashboardContent.innerHTML = '<p class="text-gray-600">Nenhum pátio cadastrado. Cadastre pátios para ver o dashboard.</p>';
-                    return;
-                }
-
-                const countsByYard = {};
-                yards.forEach(yard => countsByYard[yard.nome] = 0);
-                vehicles.forEach(vehicle => {
-                    if (countsByYard[vehicle.patio] !== undefined) {
-                        countsByYard[vehicle.patio]++;
-                    }
-                });
-
-                // Total vehicles in all yards
                 const totalVehicles = vehicles.length;
                 let totalCard = document.createElement('div');
                 totalCard.className = 'bg-indigo-100 p-6 rounded-lg shadow-md flex items-center justify-between';
@@ -862,6 +864,19 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 `;
                 dashboardContent.appendChild(totalCard);
+
+                if (yards.length === 0) {
+                    dashboardContent.innerHTML += '<p class="text-gray-600 mt-4">Nenhum pátio cadastrado. Cadastre pátios para ver a distribuição.</p>';
+                    return;
+                }
+
+                const countsByYard = {};
+                yards.forEach(yard => countsByYard[yard.nome] = 0);
+                vehicles.forEach(vehicle => {
+                    if (countsByYard[vehicle.patio] !== undefined) {
+                        countsByYard[vehicle.patio]++;
+                    }
+                });
 
                 for (const yardName in countsByYard) {
                     const card = document.createElement('div');
