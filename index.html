@@ -12,7 +12,23 @@
         /* Custom styles for responsive sidebar toggle */
         @media (max-width: 767px) {
             #sidebar.hidden-mobile { display: none; }
-            #sidebar.visible-mobile { display: block; position: fixed; top: 0; left: 0; height: 100%; z-index: 20; width: 80%; max-width: 300px; background-color: #1a202c; /* Ensure sidebar background for mobile */ overflow-y: auto; }
+            #sidebar.visible-mobile {
+                display: block;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                z-index: 20;
+                width: 80%;
+                max-width: 300px;
+                background-color: #1a202c; /* Ensure sidebar background for mobile */
+                overflow-y: auto;
+                transform: translateX(0%);
+                transition: transform 0.3s ease-in-out;
+            }
+            #sidebar.hidden-mobile.visible-mobile-closed {
+                transform: translateX(-100%);
+            }
             main { padding-top: 5rem; /* Adjust for fixed header */ }
         }
     </style>
@@ -28,11 +44,11 @@
                 <form id="login-form" onsubmit="event.preventDefault(); handleLogin();">
                     <div class="mb-4">
                         <label for="username" class="block text-gray-700 text-sm font-semibold mb-2">Usuário</label>
-                        <input type="text" id="username" name="username" class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="seu.usuario" value="Leandro" required>
+                        <input type="text" id="username" name="username" class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="seu.usuario" required>
                     </div>
                     <div class="mb-6">
                         <label for="password" class="block text-gray-700 text-sm font-semibold mb-2">Senha</label>
-                        <input type="password" id="password" name="password" class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="********" value="Ravel@2203rv" required>
+                        <input type="password" id="password" name="password" class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="********" required>
                     </div>
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full transition duration-200">Entrar</button>
                 </form>
@@ -60,7 +76,7 @@
 
             <div class="flex flex-1 relative">
                 <!-- Sidebar -->
-                <aside id="sidebar" class="w-64 bg-blue-700 text-white p-4 hidden-mobile md:block shadow-lg md:relative absolute">
+                <aside id="sidebar" class="w-64 bg-blue-700 text-white p-4 hidden-mobile md:block shadow-lg md:relative absolute transition-transform duration-300 ease-in-out">
                     <nav>
                         <ul class="space-y-2">
                             <li><a href="#" onclick="showSection('dashboard-section')" data-view-resource="dashboard" class="block px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200">Dashboard</a></li>
@@ -429,8 +445,6 @@
         }
 
         function updateUIAccess() {
-            const currentRole = loggedInUser ? loggedInUser.role : null;
-
             // Update header info
             document.getElementById('logged-in-user').textContent = loggedInUser ? loggedInUser.username : '';
             document.getElementById('logged-in-role').textContent = loggedInUser ? loggedInUser.role.toUpperCase() : '';
@@ -547,6 +561,8 @@
             const sidebar = document.getElementById('sidebar');
             if (sidebar.classList.contains('visible-mobile')) {
                 sidebar.classList.remove('visible-mobile');
+                // Add a class that effectively hides it visually when closed on mobile
+                // This ensures transition works when opening it again
                 sidebar.classList.add('hidden-mobile');
             }
         }
@@ -670,8 +686,8 @@
             document.getElementById('main-app').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('login-message').classList.add('hidden');
-            document.getElementById('username').value = DEFAULT_ADMIN_USERNAME; // Reset for convenience
-            document.getElementById('password').value = DEFAULT_ADMIN_PASSWORD; // Reset for convenience
+            document.getElementById('username').value = ''; // Clear username on logout
+            document.getElementById('password').value = ''; // Clear password on logout
             updateUIAccess(); // Reset UI elements visibility
         }
 
@@ -829,6 +845,13 @@
             let users = loadData('users');
             const isEditingLeandro = (id === DEFAULT_ADMIN_ID);
 
+            // Check for duplicate username during creation or if changing username during edit
+            if ((isCreating && users.some(u => u.username.toLowerCase() === username.toLowerCase())) || 
+                (!isCreating && users.some(u => u.username.toLowerCase() === username.toLowerCase() && u.id !== id))) {
+                alert('Usuário com este nome já cadastrado!');
+                return;
+            }
+
             if (id) { // Editing existing user
                 let userIndex = users.findIndex(u => u.id === id);
                 if (userIndex !== -1) {
@@ -851,7 +874,7 @@
                         }
                     }
 
-                    // Prevent changing current logged in user to inactive (if not current loggedInUser is the only active admin)
+                    // Prevent changing current logged in user to inactive
                     if (id === loggedInUser.id && status === 'inativo') {
                          alert('Você não pode desativar sua própria conta enquanto estiver logado.');
                          return;
@@ -867,10 +890,6 @@
                     alert('Usuário não encontrado para edição.');
                 }
             } else { // Adding new user
-                if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
-                    alert('Usuário com este nome já cadastrado!');
-                    return;
-                }
                 users.push({ id: generateId(), username, password, role, status, createdAt: new Date().toISOString() });
                 alert('Usuário cadastrado com sucesso!');
             }
@@ -1234,6 +1253,10 @@
         // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
             initializeLocalStorage();
+            // Clear login fields on page load for manual entry as per requirement
+            document.getElementById('username').value = ''; 
+            document.getElementById('password').value = '';
+
             // Check if logged in on page load
             const storedUser = localStorage.getItem(LS_PREFIX + 'loggedInUser');
             if (storedUser) {
