@@ -22,8 +22,8 @@
     <div id="app" class="min-h-screen flex flex-col">
 
         <!-- Login Screen -->
-        <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-700 to-indigo-800">
-            <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm">
+        <div id="login-screen" class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-700 to-indigo-800">
+            <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm mb-auto mt-auto">
                 <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">Controle De Pátio Grupo Ravel</h2>
                 <form id="login-form" onsubmit="event.preventDefault(); handleLogin();">
                     <div class="mb-4">
@@ -37,10 +37,11 @@
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full transition duration-200">Entrar</button>
                 </form>
                 <p id="login-message" class="text-red-500 text-xs italic mt-4 text-center hidden">Credenciais inválidas ou usuário inativo.</p>
-                <p class="text-gray-500 text-xs text-center mt-4">Usuário inicial: <strong>Leandro</strong></p>
-                <p class="text-gray-500 text-xs text-center">Senha inicial: <strong>Ravel@2203rv</strong></p>
                 <button onclick="resetSystem()" class="mt-6 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg w-full transition duration-200">Resetar Sistema</button>
             </div>
+            <footer class="bg-gray-800 text-white text-center p-4 text-sm w-full mt-auto">
+                Desenvolvido por Leandro Fernandes
+            </footer>
         </div>
 
         <!-- Main App Screen (hidden until login) -->
@@ -325,7 +326,7 @@
             </div>
 
             <!-- Footer -->
-            <footer class="bg-gray-800 text-white text-center p-4 text-sm">
+            <footer class="bg-gray-800 text-white text-center p-4 text-sm mt-auto">
                 Desenvolvido por Leandro Fernandes
             </footer>
         </div>
