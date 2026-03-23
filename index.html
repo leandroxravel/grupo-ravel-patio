@@ -1,45 +1,112 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Controle De Pátio Grupo Ravel</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-100 min-h-screen flex flex-col"><div id="app" class="flex-grow"></div><footer class="p-4 text-center text-sm text-gray-600 border-t bg-white">Desenvolvido por Leandro Fernandes</footer><script>
-const DB = { USERS: 'ravel_u', VEHICLES: 'ravel_v', PATIOS: 'ravel_p', MODELS: 'ravel_m', HIST: 'ravel_h' };
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Controle De Pátio Grupo Ravel</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-100 flex flex-col min-h-screen"><div id="app" class="flex-grow"></div><footer class="p-4 text-center text-sm text-gray-500 bg-white border-t">Desenvolvido por Leandro Fernandes</footer><script>
+const STORAGE_KEYS = {
+    USERS: 'ravel_users',
+    VEHICLES: 'ravel_vehicles',
+    PATIOS: 'ravel_patios',
+    MODELS: 'ravel_models',
+    HISTORY: 'ravel_history'
+};
+
 let currentUser = null;
 
-function init() {
-    let users = JSON.parse(localStorage.getItem(DB.USERS) || '[]');
+function initializeApp() {
+    let users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
     if (!users.find(u => u.username === 'Leandro')) {
-        users.push({ username: 'Leandro', password: 'Ravel@2203rv', role: 'administrador', status: 'ativo' });
-        localStorage.setItem(DB.USERS, JSON.stringify(users));
+        users.push({
+            username: 'Leandro',
+            password: 'Ravel@2203rv',
+            role: 'administrador',
+            status: 'ativo'
+        });
+        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
     }
-    Object.values(DB).forEach(k => { if (k !== DB.USERS && !localStorage.getItem(k)) localStorage.setItem(k, '[]'); });
+    Object.values(STORAGE_KEYS).forEach(key => {
+        if (!localStorage.getItem(key)) {
+            localStorage.setItem(key, '[]');
+        }
+    });
 }
 
-function render() {
+function renderUI() {
     const app = document.getElementById('app');
     if (!currentUser) {
-        app.innerHTML = `<div class="flex justify-center items-center h-screen"><form id="login-form" class="bg-white p-8 rounded-lg shadow-xl w-96"><h1 class="text-2xl font-bold mb-6 text-center text-blue-900">Controle De Pátio Grupo Ravel</h1><input id="u" type="text" placeholder="Usuário" class="w-full p-3 mb-4 border rounded" required><input id="p" type="password" placeholder="Senha" class="w-full p-3 mb-6 border rounded" required><button class="w-full bg-blue-700 text-white p-3 rounded font-bold">Entrar</button></form></div>`;
-        document.getElementById('login-form').onsubmit = (e) => {
+        app.innerHTML = `
+            <div class="flex justify-center items-center h-screen">
+                <form id="loginForm" class="bg-white p-8 rounded-lg shadow-xl w-96">
+                    <h1 class="text-2xl font-bold mb-6 text-center text-blue-900">Controle De Pátio Grupo Ravel</h1>
+                    <input id="username" type="text" placeholder="Usuário" class="w-full p-3 mb-4 border rounded" required>
+                    <input id="password" type="password" placeholder="Senha" class="w-full p-3 mb-6 border rounded" required>
+                    <button class="w-full bg-blue-700 text-white p-3 rounded font-bold">Entrar</button>
+                </form>
+            </div>
+        `;
+        document.getElementById('loginForm').onsubmit = (e) => {
             e.preventDefault();
-            const users = JSON.parse(localStorage.getItem(DB.USERS));
-            const u = document.getElementById('u').value, p = document.getElementById('p').value;
-            const user = users.find(x => x.username === u && x.password === p && x.status === 'ativo');
-            if (user) { currentUser = user; render(); } else { alert('Acesso negado'); }
+            const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS));
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const foundUser = users.find(u => u.username === username && u.password === password && u.status === 'ativo');
+            if (foundUser) {
+                currentUser = foundUser;
+                renderUI();
+            } else {
+                alert('Credenciais inválidas ou usuário inativo.');
+            }
         };
     } else {
-        app.innerHTML = `<nav class="bg-blue-900 text-white p-4 flex gap-4 flex-wrap">
-            <span class="font-bold mr-4">Grupo Ravel</span>
-            <button onclick="nav('dash')" class="hover:text-blue-200">Dashboard</button>
-            <button onclick="nav('consulta')" class="hover:text-blue-200">Consulta</button>
-            ${['administrador', 'operador'].includes(currentUser.role) ? '<button onclick="nav(\'movimentacao\')" class="hover:text-blue-200">Entrada/Saída</button>' : ''}
-            ${currentUser.role === 'administrador' ? '<button onclick="nav(\'admin\')" class="hover:text-blue-200">Gestão</button>' : ''}
-            <button class="ml-auto bg-red-700 px-3 py-1 rounded" onclick="currentUser=null;render()">Sair</button>
-        </nav><main id="main" class="p-6"></main>`;
-        nav('dash');
+        app.innerHTML = `
+            <nav class="bg-blue-900 text-white p-4 flex gap-4 flex-wrap">
+                <span class="font-bold mr-4">Grupo Ravel</span>
+                <button onclick="navigateTo('dashboard')" class="hover:text-blue-200">Dashboard</button>
+                <button onclick="navigateTo('consulta')" class="hover:text-blue-200">Consulta</button>
+                ${currentUser.role === 'administrador' || currentUser.role === 'operador' ? '<button onclick="navigateTo(\'movimentacao\')" class="hover:text-blue-200">Entrada/Saída</button>' : ''}
+                ${currentUser.role === 'administrador' ? '<button onclick="navigateTo(\'cadastro\')" class="hover:text-blue-200">Cadastros</button><button onclick="navigateTo(\'usuarios\')" class="hover:text-blue-200">Gestão de Usuários</button>' : ''}
+                <button class="ml-auto bg-red-700 px-3 py-1 rounded" onclick="logout()">Sair</button>
+            </nav>
+            <main id="content-area" class="p-6"></main>
+        `;
+        navigateTo('dashboard');
     }
 }
 
-function nav(page) {
-    const main = document.getElementById('main');
-    main.innerHTML = `<h2 class="text-2xl font-bold mb-4 capitalize">${page}</h2><div class="bg-white p-6 rounded shadow">Sistema operando: ${page}</div>`;
+function navigateTo(page) {
+    const contentArea = document.getElementById('content-area');
+    let pageTitle = '';
+    let pageContent = '';
+
+    switch(page) {
+        case 'dashboard':
+            pageTitle = 'Dashboard';
+            pageContent = '<p>Visão geral do pátio...</p>';
+            break;
+        case 'consulta':
+            pageTitle = 'Consulta de Veículos';
+            pageContent = '<p>Consulte por chassi...</p>';
+            break;
+        case 'movimentacao':
+            pageTitle = 'Entrada e Saída de Veículos';
+            pageContent = '<p>Registre a entrada ou saída...</p>';
+            break;
+        case 'cadastro':
+            pageTitle = 'Cadastros';
+            pageContent = '<p>Gerencie modelos, pátios...</p>';
+            break;
+        case 'usuarios':
+            pageTitle = 'Gestão de Usuários';
+            pageContent = '<p>Crie, edite ou desative usuários...</p>';
+            break;
+        default:
+            pageTitle = 'Página não encontrada';
+            pageContent = '<p>Erro 404.</p>';
+    }
+    contentArea.innerHTML = `<h2 class="text-2xl font-bold mb-4 capitalize">${pageTitle}</h2><div class="bg-white p-6 rounded shadow">${pageContent}</div>`;
 }
 
-init();
-render();
+function logout() {
+    currentUser = null;
+    renderUI();
+}
+
+initializeApp();
+renderUI();
 </script></body></html>
