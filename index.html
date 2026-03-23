@@ -1,46 +1,37 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Controle De Pátio Grupo Ravel</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-100 min-h-screen flex flex-col font-sans"><div id="app" class="flex-grow"></div><footer class="p-4 text-center text-sm text-gray-600 bg-white border-t">Desenvolvido por Leandro Fernandes</footer><script>
-const STORAGE = { U: 'ravel_users', V: 'ravel_veiculos', M: 'ravel_modelos', P: 'ravel_patios', H: 'ravel_hist' };
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Controle De Pátio Grupo Ravel</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-100 min-h-screen flex flex-col"><div id="app" class="flex-grow"></div><footer class="p-4 text-center text-sm text-gray-600 border-t bg-white">Desenvolvido por Leandro Fernandes</footer><script>
+const DB_KEYS = { U: 'ravel_users', V: 'ravel_veiculos', P: 'ravel_patios', M: 'ravel_modelos', H: 'ravel_historico' };
 let currentUser = null;
 
 function init() {
-    let users = JSON.parse(localStorage.getItem(STORAGE.U) || '[]');
-    if (!users.find(u => u.user === 'Leandro')) {
-        users.push({ user: 'Leandro', pass: 'Ravel@2203rv', perfil: 'administrador', status: 'ativo' });
-        localStorage.setItem(STORAGE.U, JSON.stringify(users));
+    let users = JSON.parse(localStorage.getItem(DB_KEYS.U) || '[]');
+    if (!users.find(u => u.username === 'Leandro')) {
+        users.push({ username: 'Leandro', password: 'Ravel@2203rv', profile: 'administrador', status: 'ativo' });
+        localStorage.setItem(DB_KEYS.U, JSON.stringify(users));
     }
-    ['V', 'M', 'P', 'H'].forEach(k => { if(!localStorage.getItem(STORAGE[k])) localStorage.setItem(STORAGE[k], '[]'); });
+    Object.values(DB_KEYS).forEach(k => { if (!localStorage.getItem(k)) localStorage.setItem(k, '[]'); });
     render();
 }
 
 function render() {
     const app = document.getElementById('app');
     if (!currentUser) {
-        app.innerHTML = `<div class="flex justify-center items-center h-screen"><form id="login" class="bg-white p-8 rounded-lg shadow-xl w-96"><h1 class="text-2xl font-bold mb-6 text-center">Controle De Pátio Grupo Ravel</h1><input id="u" type="text" placeholder="Usuário" class="w-full p-3 mb-4 border rounded" required><input id="p" type="password" placeholder="Senha" class="w-full p-3 mb-6 border rounded" required><button class="w-full bg-blue-700 text-white p-3 rounded font-bold">Entrar</button></form></div>`;
-        document.getElementById('login').onsubmit = (e) => {
+        app.innerHTML = `<div class="flex justify-center items-center h-screen"><form id="loginForm" class="bg-white p-8 rounded shadow-md w-96"><h1 class="text-2xl font-bold mb-6 text-center">Controle De Pátio Grupo Ravel</h1><input type="text" id="u" placeholder="Usuário" class="w-full p-2 border mb-4" required><input type="password" id="p" placeholder="Senha" class="w-full p-2 border mb-4" required><button class="w-full bg-blue-600 text-white p-2 rounded">Entrar</button></form></div>`;
+        document.getElementById('loginForm').onsubmit = (e) => {
             e.preventDefault();
-            const users = JSON.parse(localStorage.getItem(STORAGE.U));
-            const u = document.getElementById('u').value, p = document.getElementById('p').value;
-            const user = users.find(x => x.user === u && x.pass === p && x.status === 'ativo');
-            if (user) { currentUser = user; render(); } else alert('Credenciais inválidas ou conta inativa');
+            const users = JSON.parse(localStorage.getItem(DB_KEYS.U));
+            const user = users.find(x => x.username === document.getElementById('u').value && x.password === document.getElementById('p').value && x.status === 'ativo');
+            if (user) { currentUser = user; render(); } else alert('Credenciais inválidas');
         };
     } else {
-        app.innerHTML = `
-            <nav class="bg-blue-900 text-white p-4 shadow-lg flex gap-4">
-                <span class="font-bold mr-4">Grupo Ravel</span>
-                <button onclick="nav('dash')" class="hover:underline">Dashboard</button>
-                <button onclick="nav('consulta')" class="hover:underline">Consulta</button>
-                ${['administrador', 'operador'].includes(currentUser.perfil) ? '<button onclick="nav(\'mov\')" class="hover:underline">Entrada/Saída</button>' : ''}
-                ${currentUser.perfil === 'administrador' ? '<button onclick="nav(\'config\')" class="hover:underline">Configurações</button>' : ''}
-                <button onclick="currentUser=null;render()" class="ml-auto bg-red-700 px-3 py-1 rounded">Sair</button>
-            </nav>
-            <div id="content" class="p-6"></div>`;
-        nav('dash');
+        app.innerHTML = `<nav class="bg-blue-900 text-white p-4 flex gap-4 flex-wrap"><span class="font-bold">Grupo Ravel</span><button onclick="navigate('dashboard')">Dashboard</button><button onclick="navigate('consulta')">Consulta</button>${['administrador', 'operador'].includes(currentUser.profile) ? '<button onclick="navigate(\'movimentacao\')">Entrada/Saída</button>' : ''}${currentUser.profile === 'administrador' ? '<button onclick="navigate(\'usuarios\')">Usuários</button>' : ''}<button class="ml-auto bg-red-600 px-3 py-1 rounded" onclick="currentUser=null;render()">Sair</button></nav><div id="main" class="p-6"></div>`;
+        navigate('dashboard');
     }
 }
 
-function nav(page) {
-    const content = document.getElementById('content');
-    content.innerHTML = `<h2 class="text-2xl font-bold mb-4">${page.toUpperCase()}</h2><div class="bg-white p-6 rounded shadow">Sistema em operação.</div>`;
+function navigate(page) {
+    const main = document.getElementById('main');
+    const canManage = currentUser.profile === 'administrador';
+    main.innerHTML = `<h2 class="text-xl font-bold capitalize mb-4">${page}</h2><div class="bg-white p-4 rounded shadow">Painel de ${page}. Acesso: ${currentUser.profile}.</div>`;
 }
 
 init();
