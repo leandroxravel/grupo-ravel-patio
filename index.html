@@ -1,112 +1,305 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Controle De Pátio Grupo Ravel</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-100 flex flex-col min-h-screen"><div id="app" class="flex-grow"></div><footer class="p-4 text-center text-sm text-gray-500 bg-white border-t">Desenvolvido por Leandro Fernandes</footer><script>
-const STORAGE_KEYS = {
-    USERS: 'ravel_users',
-    VEHICLES: 'ravel_vehicles',
-    PATIOS: 'ravel_patios',
-    MODELS: 'ravel_models',
-    HISTORY: 'ravel_history'
-};
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle De Pátio Grupo Ravel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    <div id="app" class="flex-grow"></div>
+    <footer class="p-4 text-center text-sm text-gray-600 bg-white border-t">
+        Desenvolvido por Leandro Fernandes
+    </footer>
 
-let currentUser = null;
-
-function initializeApp() {
-    let users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
-    if (!users.find(u => u.username === 'Leandro')) {
-        users.push({
-            username: 'Leandro',
-            password: 'Ravel@2203rv',
-            role: 'administrador',
-            status: 'ativo'
-        });
-        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
-    }
-    Object.values(STORAGE_KEYS).forEach(key => {
-        if (!localStorage.getItem(key)) {
-            localStorage.setItem(key, '[]');
-        }
-    });
-}
-
-function renderUI() {
-    const app = document.getElementById('app');
-    if (!currentUser) {
-        app.innerHTML = `
-            <div class="flex justify-center items-center h-screen">
-                <form id="loginForm" class="bg-white p-8 rounded-lg shadow-xl w-96">
-                    <h1 class="text-2xl font-bold mb-6 text-center text-blue-900">Controle De Pátio Grupo Ravel</h1>
-                    <input id="username" type="text" placeholder="Usuário" class="w-full p-3 mb-4 border rounded" required>
-                    <input id="password" type="password" placeholder="Senha" class="w-full p-3 mb-6 border rounded" required>
-                    <button class="w-full bg-blue-700 text-white p-3 rounded font-bold">Entrar</button>
-                </form>
-            </div>
-        `;
-        document.getElementById('loginForm').onsubmit = (e) => {
-            e.preventDefault();
-            const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS));
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const foundUser = users.find(u => u.username === username && u.password === password && u.status === 'ativo');
-            if (foundUser) {
-                currentUser = foundUser;
-                renderUI();
-            } else {
-                alert('Credenciais inválidas ou usuário inativo.');
-            }
+    <script>
+        const STORAGE_KEYS = {
+            USERS: 'ravel_users',
+            VEHICLES: 'ravel_vehicles',
+            PATIOS: 'ravel_patios',
+            MODELS: 'ravel_models',
+            HISTORY: 'ravel_history'
         };
-    } else {
-        app.innerHTML = `
-            <nav class="bg-blue-900 text-white p-4 flex gap-4 flex-wrap">
-                <span class="font-bold mr-4">Grupo Ravel</span>
-                <button onclick="navigateTo('dashboard')" class="hover:text-blue-200">Dashboard</button>
-                <button onclick="navigateTo('consulta')" class="hover:text-blue-200">Consulta</button>
-                ${currentUser.role === 'administrador' || currentUser.role === 'operador' ? '<button onclick="navigateTo(\'movimentacao\')" class="hover:text-blue-200">Entrada/Saída</button>' : ''}
-                ${currentUser.role === 'administrador' ? '<button onclick="navigateTo(\'cadastro\')" class="hover:text-blue-200">Cadastros</button><button onclick="navigateTo(\'usuarios\')" class="hover:text-blue-200">Gestão de Usuários</button>' : ''}
-                <button class="ml-auto bg-red-700 px-3 py-1 rounded" onclick="logout()">Sair</button>
-            </nav>
-            <main id="content-area" class="p-6"></main>
-        `;
-        navigateTo('dashboard');
-    }
-}
 
-function navigateTo(page) {
-    const contentArea = document.getElementById('content-area');
-    let pageTitle = '';
-    let pageContent = '';
+        let currentUser = null;
 
-    switch(page) {
-        case 'dashboard':
-            pageTitle = 'Dashboard';
-            pageContent = '<p>Visão geral do pátio...</p>';
-            break;
-        case 'consulta':
-            pageTitle = 'Consulta de Veículos';
-            pageContent = '<p>Consulte por chassi...</p>';
-            break;
-        case 'movimentacao':
-            pageTitle = 'Entrada e Saída de Veículos';
-            pageContent = '<p>Registre a entrada ou saída...</p>';
-            break;
-        case 'cadastro':
-            pageTitle = 'Cadastros';
-            pageContent = '<p>Gerencie modelos, pátios...</p>';
-            break;
-        case 'usuarios':
-            pageTitle = 'Gestão de Usuários';
-            pageContent = '<p>Crie, edite ou desative usuários...</p>';
-            break;
-        default:
-            pageTitle = 'Página não encontrada';
-            pageContent = '<p>Erro 404.</p>';
-    }
-    contentArea.innerHTML = `<h2 class="text-2xl font-bold mb-4 capitalize">${pageTitle}</h2><div class="bg-white p-6 rounded shadow">${pageContent}</div>`;
-}
+        function getFromLocalStorage(key) {
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
 
-function logout() {
-    currentUser = null;
-    renderUI();
-}
+        function saveToLocalStorage(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
 
-initializeApp();
-renderUI();
-</script></body></html>
+        function initializeApp() {
+            let users = getFromLocalStorage(STORAGE_KEYS.USERS);
+            if (!users.find(u => u.username === 'Leandro')) {
+                users.push({
+                    username: 'Leandro',
+                    password: 'Ravel@2203rv',
+                    role: 'administrador',
+                    status: 'ativo'
+                });
+                saveToLocalStorage(STORAGE_KEYS.USERS, users);
+            }
+            Object.values(STORAGE_KEYS).forEach(key => {
+                if (!localStorage.getItem(key)) {
+                    saveToLocalStorage(key, []);
+                }
+            });
+        }
+
+        function renderUI() {
+            const app = document.getElementById('app');
+            if (!currentUser) {
+                app.innerHTML = `
+                    <div class="flex justify-center items-center h-screen">
+                        <form id="loginForm" class="bg-white p-8 rounded-lg shadow-xl w-96">
+                            <h1 class="text-2xl font-bold mb-6 text-center text-blue-900">Controle De Pátio Grupo Ravel</h1>
+                            <input id="username" type="text" placeholder="Usuário" class="w-full p-3 mb-4 border rounded" required>
+                            <input id="password" type="password" placeholder="Senha" class="w-full p-3 mb-6 border rounded" required>
+                            <button type="submit" class="w-full bg-blue-700 text-white p-3 rounded font-bold">Entrar</button>
+                        </form>
+                    </div>
+                `;
+                document.getElementById('loginForm').onsubmit = (e) => {
+                    e.preventDefault();
+                    const users = getFromLocalStorage(STORAGE_KEYS.USERS);
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+                    const foundUser = users.find(u => u.username === username && u.password === password && u.status === 'ativo');
+                    if (foundUser) {
+                        currentUser = foundUser;
+                        renderUI();
+                    } else {
+                        alert('Credenciais inválidas ou usuário inativo.');
+                    }
+                };
+            } else {
+                app.innerHTML = `
+                    <nav class="bg-blue-900 text-white p-4 flex gap-4 flex-wrap">
+                        <span class="font-bold mr-4">Grupo Ravel</span>
+                        <button onclick="navigateTo('dashboard')" class="hover:text-blue-200">Dashboard</button>
+                        <button onclick="navigateTo('consulta')" class="hover:text-blue-200">Consulta</button>
+                        ${['administrador', 'operador'].includes(currentUser.role) ? '<button onclick="navigateTo(\'movimentacao\')" class="hover:text-blue-200">Entrada/Saída</button>' : ''}
+                        ${currentUser.role === 'administrador' ? '<button onclick="navigateTo(\'cadastro\')" class="hover:text-blue-200">Cadastros</button><button onclick="navigateTo(\'usuarios\')" class="hover:text-blue-200">Gestão de Usuários</button>' : ''}
+                        <button class="ml-auto bg-red-700 px-3 py-1 rounded" onclick="logout()">Sair</button>
+                    </nav>
+                    <main id="content-area" class="p-6"></main>
+                `;
+                navigateTo('dashboard'); // Default page after login
+            }
+        }
+
+        function navigateTo(page) {
+            const contentArea = document.getElementById('content-area');
+            let pageTitle = '';
+            let pageContent = '';
+
+            switch(page) {
+                case 'dashboard':
+                    pageTitle = 'Dashboard';
+                    const vehicles = getFromLocalStorage(STORAGE_KEYS.VEHICLES);
+                    const patios = getFromLocalStorage(STORAGE_KEYS.PATIOS);
+                    const totalVehicles = vehicles.length;
+                    const vehiclesByPatio = patios.map(p => ({ 
+                        name: p.name,
+                        count: vehicles.filter(v => v.currentPatio === p.name).length 
+                    }));
+                    pageContent = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="bg-blue-100 p-4 rounded shadow">Total de Veículos no Pátio: <span class="font-bold text-xl">${totalVehicles}</span></div>
+                            ${vehiclesByPatio.map(p => `<div class="bg-green-100 p-4 rounded shadow">${p.name}: <span class="font-bold text-xl">${p.count}</span></div>`).join('')}
+                        </div>
+                    `;
+                    break;
+                case 'consulta':
+                    pageTitle = 'Consulta de Veículos';
+                    pageContent = `
+                        <input type="text" id="searchChassi" placeholder="Buscar por Chassi" class="p-2 border rounded mb-4 w-full md:w-1/2">
+                        <button onclick="searchVehicle()" class="bg-blue-600 text-white px-4 py-2 rounded ml-2">Buscar</button>
+                        <div id="searchResult" class="mt-4"></div>
+                    `;
+                    break;
+                case 'movimentacao':
+                    if (!['administrador', 'operador'].includes(currentUser.role)) { alert('Acesso negado'); return; }
+                    pageTitle = 'Entrada e Saída de Veículos';
+                    const availablePatios = getFromLocalStorage(STORAGE_KEYS.PATIOS);
+                    const availableModels = getFromLocalStorage(STORAGE_KEYS.MODELS);
+                    pageContent = `
+                        <h3 class="text-lg font-semibold mb-2">Registrar Entrada</h3>
+                        <form id="entradaForm" class="mb-6 p-4 border rounded">
+                            <input type="text" id="entradaChassi" placeholder="Chassi" class="w-full p-2 border rounded mb-2" required>
+                            <select id="entradaModelo" class="w-full p-2 border rounded mb-2" required>
+                                <option value="">Selecione o Modelo</option>
+                                ${availableModels.map(m => `<option value="${m.name}">${m.name}</option>`).join('')}
+                            </select>
+                            <select id="entradaPatio" class="w-full p-2 border rounded mb-2" required>
+                                <option value="">Selecione o Pátio</option>
+                                ${availablePatios.map(p => `<option value="${p.name}">${p.name}</option>`).join('')}
+                            </select>
+                            <textarea id="entradaObs" placeholder="Observações/Avarias" class="w-full p-2 border rounded mb-4"></textarea>
+                            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Registrar Entrada</button>
+                        </form>
+
+                        <h3 class="text-lg font-semibold mb-2">Registrar Saída</h3>
+                        <form id="saidaForm" class="p-4 border rounded">
+                            <input type="text" id="saidaChassi" placeholder="Chassi" class="w-full p-2 border rounded mb-2" required>
+                            <textarea id="saidaObs" placeholder="Observações/Avarias" class="w-full p-2 border rounded mb-4"></textarea>
+                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded">Registrar Saída</button>
+                        </form>
+                    `;
+                    break;
+                case 'cadastro':
+                    if (currentUser.role !== 'administrador') { alert('Acesso negado'); return; }
+                    pageTitle = 'Cadastros';
+                    pageContent = `
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-gray-50 p-4 rounded shadow">
+                                <h4 class="font-semibold mb-2">Veículos (Chassi/Modelo)</h4>
+                                <form id="addVehicleForm">
+                                    <input type="text" id="newVehicleChassi" placeholder="Novo Chassi" class="w-full p-2 border rounded mb-2" required>
+                                    <input type="text" id="newVehicleModelo" placeholder="Modelo" class="w-full p-2 border rounded mb-2" required>
+                                    <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Adicionar Veículo</button>
+                                </form>
+                                <ul id="vehicleList" class="mt-4 list-disc pl-5"></ul>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded shadow">
+                                <h4 class="font-semibold mb-2">Modelos</h4>
+                                <form id="addModelForm">
+                                    <input type="text" id="newModelName" placeholder="Nome do Modelo" class="w-full p-2 border rounded mb-2" required>
+                                    <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Adicionar Modelo</button>
+                                </form>
+                                <ul id="modelList" class="mt-4 list-disc pl-5"></ul>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded shadow">
+                                <h4 class="font-semibold mb-2">Pátios</h4>
+                                <form id="addPatioForm">
+                                    <input type="text" id="newPatioName" placeholder="Nome do Pátio" class="w-full p-2 border rounded mb-2" required>
+                                    <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Adicionar Pátio</button>
+                                </form>
+                                <ul id="patioList" class="mt-4 list-disc pl-5"></ul>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'usuarios':
+                    if (currentUser.role !== 'administrador') { alert('Acesso negado'); return; }
+                    pageTitle = 'Gestão de Usuários';
+                    pageContent = `
+                        <form id="addUserForm" class="mb-6 p-4 border rounded">
+                            <h3 class="font-semibold mb-2">Adicionar/Editar Usuário</h3>
+                            <input type="hidden" id="editUserId">
+                            <input type="text" id="userUsername" placeholder="Usuário" class="w-full p-2 border rounded mb-2" required>
+                            <input type="password" id="userPassword" placeholder="Senha" class="w-full p-2 border rounded mb-2">
+                            <select id="userProfile" class="w-full p-2 border rounded mb-2" required>
+                                <option value="">Selecione o Perfil</option>
+                                <option value="administrador">Administrador</option>
+                                <option value="supervisor">Supervisor</option>
+                                <option value="operador">Operador</option>
+                            </select>
+                            <label class="inline-flex items-center mt-2 mb-4">
+                                <input type="checkbox" id="userStatus" class="form-checkbox">
+                                <span class="ml-2">Ativo</span>
+                            </label><br>
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Salvar Usuário</button>
+                        </form>
+                        <h3 class="font-semibold mb-2">Lista de Usuários</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white border">
+                                <thead>
+                                    <tr>
+                                        <th class="py-2 px-4 border-b">Usuário</th>
+                                        <th class="py-2 px-4 border-b">Perfil</th>
+                                        <th class="py-2 px-4 border-b">Status</th>
+                                        <th class="py-2 px-4 border-b">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userTableBody"></tbody>
+                            </table>
+                        </div>
+                    `;
+                    break;
+                default:
+                    pageTitle = 'Página não encontrada';
+                    pageContent = '<p>Erro 404: A página que você tentou acessar não existe.</p>';
+            }
+            contentArea.innerHTML = `<h2 class="text-2xl font-bold mb-4 capitalize">${pageTitle}</h2><div class="bg-white p-6 rounded shadow">${pageContent}</div>`;
+            // Post-render actions for specific pages
+            if (page === 'cadastro') {
+                loadCadastrosLists();
+                document.getElementById('addVehicleForm').onsubmit = addVehicle;
+                document.getElementById('addModelForm').onsubmit = addModel;
+                document.getElementById('addPatioForm').onsubmit = addPatio;
+            }
+            if (page === 'usuarios') {
+                loadUsersTable();
+                document.getElementById('addUserForm').onsubmit = saveUser;
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            renderUI();
+        }
+
+        // CRUD functions for Cadastros (simplified for now)
+        function addVehicle(e) { e.preventDefault(); /* Logic to add vehicle */ alert('Adicionar Veículo (funcionalidade em desenvolvimento)'); loadCadastrosLists(); }
+        function addModel(e) { e.preventDefault(); /* Logic to add model */ alert('Adicionar Modelo (funcionalidade em desenvolvimento)'); loadCadastrosLists(); }
+        function addPatio(e) { e.preventDefault(); /* Logic to add patio */ alert('Adicionar Pátio (funcionalidade em desenvolvimento)'); loadCadastrosLists(); }
+        
+        function loadCadastrosLists() {
+            const vehicles = getFromLocalStorage(STORAGE_KEYS.VEHICLES);
+            const models = getFromLocalStorage(STORAGE_KEYS.MODELS);
+            const patios = getFromLocalStorage(STORAGE_KEYS.PATIOS);
+
+            document.getElementById('vehicleList').innerHTML = vehicles.map(v => `<li>${v.chassi} - ${v.model}</li>`).join('');
+            document.getElementById('modelList').innerHTML = models.map(m => `<li>${m.name}</li>`).join('');
+            document.getElementById('patioList').innerHTML = patios.map(p => `<li>${p.name}</li>`).join('');
+        }
+
+        // CRUD functions for Users (simplified for now)
+        function saveUser(e) { e.preventDefault(); /* Logic to save user */ alert('Salvar Usuário (funcionalidade em desenvolvimento)'); loadUsersTable(); }
+        function loadUsersTable() {
+            const users = getFromLocalStorage(STORAGE_KEYS.USERS);
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td class="py-2 px-4 border-b">${user.username}</td>
+                    <td class="py-2 px-4 border-b">${user.role}</td>
+                    <td class="py-2 px-4 border-b">${user.status === 'ativo' ? 'Ativo' : 'Inativo'}</td>
+                    <td class="py-2 px-4 border-b">
+                        <button onclick="editUser('${user.username}')" class="bg-yellow-500 text-white px-2 py-1 rounded text-sm mr-1">Editar</button>
+                        <button onclick="toggleUserStatus('${user.username}')" class="${user.status === 'ativo' ? 'bg-orange-500' : 'bg-green-500'} text-white px-2 py-1 rounded text-sm mr-1">${user.status === 'ativo' ? 'Desativar' : 'Ativar'}</button>
+                        <button onclick="deleteUser('${user.username}')" class="bg-red-500 text-white px-2 py-1 rounded text-sm">Excluir</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editUser(username) { alert('Editar usuário ' + username + ' (funcionalidade em desenvolvimento)'); /* Logic to load user data into form */ }
+        function toggleUserStatus(username) { alert('Alterar status de ' + username + ' (funcionalidade em desenvolvimento)'); /* Logic to change user status */ loadUsersTable(); }
+        function deleteUser(username) {
+            if (username === 'Leandro') { alert('O usuário Leandro não pode ser excluído.'); return; }
+            const users = getFromLocalStorage(STORAGE_KEYS.USERS);
+            const adminCount = users.filter(u => u.role === 'administrador' && u.status === 'ativo').length;
+            if (adminCount === 1 && users.find(u => u.username === username && u.role === 'administrador' && u.status === 'ativo')) {
+                alert('Não é possível excluir o último administrador ativo do sistema.');
+                return;
+            }
+            if (confirm(`Tem certeza que deseja excluir o usuário ${username}?`)) {
+                // Logic to delete user
+                alert('Excluir usuário ' + username + ' (funcionalidade em desenvolvimento)');
+                loadUsersTable();
+            }
+        }
+
+        // Consulta Vehicle
+        function searchVehicle() { alert('Buscar veículo (funcionalidade em desenvolvimento)'); /* Logic to search and display vehicle details */}
+
+        // Initialize app and render UI on page load
+        initializeApp();
+        renderUI();
+    </script>
+</body>
+</html>
