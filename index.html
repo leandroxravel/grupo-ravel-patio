@@ -1,60 +1,47 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Controle De Pátio Grupo Ravel</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-100 min-h-screen flex flex-col"><div id="app" class="flex-grow"></div><footer class="p-4 text-center text-sm text-gray-600">Desenvolvido por Leandro Fernandes</footer><script>
-const STORAGE = { usuarios: 'ravel_users', veiculos: 'ravel_veiculos', patios: 'ravel_patios', modelos: 'ravel_modelos', historico: 'ravel_hist' };
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Controle De Pátio Grupo Ravel</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-100 min-h-screen flex flex-col font-sans"><div id="app" class="flex-grow"></div><footer class="p-4 text-center text-sm text-gray-600 bg-white border-t">Desenvolvido por Leandro Fernandes</footer><script>
+const STORAGE = { U: 'ravel_users', V: 'ravel_veiculos', M: 'ravel_modelos', P: 'ravel_patios', H: 'ravel_hist' };
 let currentUser = null;
 
 function init() {
-    let users = JSON.parse(localStorage.getItem(STORAGE.usuarios) || '[]');
+    let users = JSON.parse(localStorage.getItem(STORAGE.U) || '[]');
     if (!users.find(u => u.user === 'Leandro')) {
         users.push({ user: 'Leandro', pass: 'Ravel@2203rv', perfil: 'administrador', status: 'ativo' });
-        localStorage.setItem(STORAGE.usuarios, JSON.stringify(users));
+        localStorage.setItem(STORAGE.U, JSON.stringify(users));
     }
+    ['V', 'M', 'P', 'H'].forEach(k => { if(!localStorage.getItem(STORAGE[k])) localStorage.setItem(STORAGE[k], '[]'); });
     render();
 }
 
 function render() {
     const app = document.getElementById('app');
     if (!currentUser) {
-        app.innerHTML = `
-            <div class="flex justify-center items-center h-full mt-20">
-                <form id="loginForm" class="bg-white p-8 rounded shadow-md w-80">
-                    <h1 class="text-xl font-bold mb-6 text-center">Controle De Pátio Grupo Ravel</h1>
-                    <input id="u" type="text" placeholder="Usuário" class="w-full p-2 mb-4 border rounded">
-                    <input id="p" type="password" placeholder="Senha" class="w-full p-2 mb-4 border rounded">
-                    <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded">Entrar</button>
-                </form>
-            </div>`;
-        document.getElementById('loginForm').onsubmit = (e) => {
+        app.innerHTML = `<div class="flex justify-center items-center h-screen"><form id="login" class="bg-white p-8 rounded-lg shadow-xl w-96"><h1 class="text-2xl font-bold mb-6 text-center">Controle De Pátio Grupo Ravel</h1><input id="u" type="text" placeholder="Usuário" class="w-full p-3 mb-4 border rounded" required><input id="p" type="password" placeholder="Senha" class="w-full p-3 mb-6 border rounded" required><button class="w-full bg-blue-700 text-white p-3 rounded font-bold">Entrar</button></form></div>`;
+        document.getElementById('login').onsubmit = (e) => {
             e.preventDefault();
-            const u = document.getElementById('u').value;
-            const p = document.getElementById('p').value;
-            const users = JSON.parse(localStorage.getItem(STORAGE.usuarios));
+            const users = JSON.parse(localStorage.getItem(STORAGE.U));
+            const u = document.getElementById('u').value, p = document.getElementById('p').value;
             const user = users.find(x => x.user === u && x.pass === p && x.status === 'ativo');
-            if (user) { currentUser = user; render(); } else { alert('Credenciais inválidas'); }
+            if (user) { currentUser = user; render(); } else alert('Credenciais inválidas ou conta inativa');
         };
     } else {
         app.innerHTML = `
-            <nav class="bg-blue-800 text-white p-4 flex gap-4">
-                <button onclick="showPage('dash')">Dashboard</button>
-                ${currentUser.perfil !== 'operador' ? '<button onclick="showPage(\'consulta\')">Consulta</button>' : ''}
-                ${['administrador', 'operador'].includes(currentUser.perfil) ? '<button onclick="showPage(\'mov\')">Entrada/Saída</button>' : ''}
-                ${currentUser.perfil === 'administrador' ? '<button onclick="showPage(\'users\')">Usuários</button>' : ''}
-                <button onclick="logout()" class="ml-auto bg-red-600 px-2 rounded">Sair</button>
+            <nav class="bg-blue-900 text-white p-4 shadow-lg flex gap-4">
+                <span class="font-bold mr-4">Grupo Ravel</span>
+                <button onclick="nav('dash')" class="hover:underline">Dashboard</button>
+                <button onclick="nav('consulta')" class="hover:underline">Consulta</button>
+                ${['administrador', 'operador'].includes(currentUser.perfil) ? '<button onclick="nav(\'mov\')" class="hover:underline">Entrada/Saída</button>' : ''}
+                ${currentUser.perfil === 'administrador' ? '<button onclick="nav(\'config\')" class="hover:underline">Configurações</button>' : ''}
+                <button onclick="currentUser=null;render()" class="ml-auto bg-red-700 px-3 py-1 rounded">Sair</button>
             </nav>
             <div id="content" class="p-6"></div>`;
-        showPage('dash');
+        nav('dash');
     }
 }
 
-function showPage(page) {
+function nav(page) {
     const content = document.getElementById('content');
-    content.innerHTML = `<h2 class="text-2xl mb-4 font-bold">${page.toUpperCase()}</h2>`;
-    if (page === 'dash') {
-        content.innerHTML += `<div class="bg-white p-4 rounded">Resumo de pátios e veículos cadastrados.</div>`;
-    } else if (page === 'users' && currentUser.perfil === 'administrador') {
-        content.innerHTML += `<div class="bg-white p-4 rounded">Gestão de usuários...</div>`;
-    }
+    content.innerHTML = `<h2 class="text-2xl font-bold mb-4">${page.toUpperCase()}</h2><div class="bg-white p-6 rounded shadow">Sistema em operação.</div>`;
 }
 
-function logout() { currentUser = null; render(); }
 init();
 </script></body></html>
