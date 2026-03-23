@@ -35,6 +35,7 @@
             let users = getFromLocalStorage(STORAGE_KEYS.USERS);
             if (!users.find(u => u.username === 'Leandro')) {
                 users.push({
+                    id: Date.now(),
                     username: 'Leandro',
                     password: 'Ravel@2203rv',
                     role: 'administrador',
@@ -101,7 +102,7 @@
                     pageTitle = 'Dashboard';
                     const vehicles = getFromLocalStorage(STORAGE_KEYS.VEHICLES);
                     const patios = getFromLocalStorage(STORAGE_KEYS.PATIOS);
-                    const totalVehicles = vehicles.length;
+                    const totalVehicles = vehicles.filter(v => v.currentPatio).length;
                     const vehiclesByPatio = patios.map(p => ({ 
                         name: p.name,
                         count: vehicles.filter(v => v.currentPatio === p.name).length 
@@ -109,12 +110,12 @@
                     pageContent = `
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div class="bg-blue-100 p-4 rounded shadow">Total de Veículos no Pátio: <span class="font-bold text-xl">${totalVehicles}</span></div>
-                            ${vehiclesByPatio.map(p => `<div class="bg-green-100 p-4 rounded shadow">${p.name}: <span class="font-bold text-xl">${p.count}</span></div>`).join('')}
+                            ${vehiclesByPatio.map(p => `<div class="bg-green-100 p-4 rounded shadow">Pátio ${p.name}: <span class="font-bold text-xl">${p.count}</span></div>`).join('')}
                         </div>
                     `;
                     break;
                 case 'consulta':
-                    pageTitle = 'Consulta de Veículos';
+                    pageTitle = 'Consulta de Veículos e Histórico';
                     pageContent = `
                         <input type="text" id="searchChassi" placeholder="Buscar por Chassi" class="p-2 border rounded mb-4 w-full md:w-1/2">
                         <button onclick="searchVehicle()" class="bg-blue-600 text-white px-4 py-2 rounded ml-2">Buscar</button>
@@ -128,7 +129,7 @@
                     const availableModels = getFromLocalStorage(STORAGE_KEYS.MODELS);
                     pageContent = `
                         <h3 class="text-lg font-semibold mb-2">Registrar Entrada</h3>
-                        <form id="entradaForm" class="mb-6 p-4 border rounded">
+                        <form id="entradaForm" class="mb-6 p-4 border rounded bg-gray-50">
                             <input type="text" id="entradaChassi" placeholder="Chassi" class="w-full p-2 border rounded mb-2" required>
                             <select id="entradaModelo" class="w-full p-2 border rounded mb-2" required>
                                 <option value="">Selecione o Modelo</option>
@@ -143,7 +144,7 @@
                         </form>
 
                         <h3 class="text-lg font-semibold mb-2">Registrar Saída</h3>
-                        <form id="saidaForm" class="p-4 border rounded">
+                        <form id="saidaForm" class="p-4 border rounded bg-gray-50">
                             <input type="text" id="saidaChassi" placeholder="Chassi" class="w-full p-2 border rounded mb-2" required>
                             <textarea id="saidaObs" placeholder="Observações/Avarias" class="w-full p-2 border rounded mb-4"></textarea>
                             <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded">Registrar Saída</button>
@@ -156,29 +157,28 @@
                     pageContent = `
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="bg-gray-50 p-4 rounded shadow">
-                                <h4 class="font-semibold mb-2">Veículos (Chassi/Modelo)</h4>
-                                <form id="addVehicleForm">
-                                    <input type="text" id="newVehicleChassi" placeholder="Novo Chassi" class="w-full p-2 border rounded mb-2" required>
-                                    <input type="text" id="newVehicleModelo" placeholder="Modelo" class="w-full p-2 border rounded mb-2" required>
-                                    <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Adicionar Veículo</button>
-                                </form>
-                                <ul id="vehicleList" class="mt-4 list-disc pl-5"></ul>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded shadow">
-                                <h4 class="font-semibold mb-2">Modelos</h4>
+                                <h4 class="font-semibold mb-2">Cadastrar Modelo</h4>
                                 <form id="addModelForm">
                                     <input type="text" id="newModelName" placeholder="Nome do Modelo" class="w-full p-2 border rounded mb-2" required>
                                     <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Adicionar Modelo</button>
                                 </form>
-                                <ul id="modelList" class="mt-4 list-disc pl-5"></ul>
+                                <h5 class="font-medium mt-4">Modelos Existentes:</h5>
+                                <ul id="modelList" class="mt-2 list-disc pl-5 text-sm"></ul>
                             </div>
                             <div class="bg-gray-50 p-4 rounded shadow">
-                                <h4 class="font-semibold mb-2">Pátios</h4>
+                                <h4 class="font-semibold mb-2">Cadastrar Pátio</h4>
                                 <form id="addPatioForm">
                                     <input type="text" id="newPatioName" placeholder="Nome do Pátio" class="w-full p-2 border rounded mb-2" required>
                                     <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Adicionar Pátio</button>
                                 </form>
-                                <ul id="patioList" class="mt-4 list-disc pl-5"></ul>
+                                <h5 class="font-medium mt-4">Pátios Existentes:</h5>
+                                <ul id="patioList" class="mt-2 list-disc pl-5 text-sm"></ul>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded shadow">
+                                <h4 class="font-semibold mb-2">Veículos Cadastrados</h4>
+                                <p class="text-sm">Veículos são cadastrados automaticamente na primeira entrada.</p>
+                                <h5 class="font-medium mt-4">Veículos Existentes:</h5>
+                                <ul id="vehicleList" class="mt-2 list-disc pl-5 text-sm"></ul>
                             </div>
                         </div>
                     `;
@@ -187,11 +187,11 @@
                     if (currentUser.role !== 'administrador') { alert('Acesso negado'); return; }
                     pageTitle = 'Gestão de Usuários';
                     pageContent = `
-                        <form id="addUserForm" class="mb-6 p-4 border rounded">
+                        <form id="userForm" class="mb-6 p-4 border rounded bg-gray-50">
                             <h3 class="font-semibold mb-2">Adicionar/Editar Usuário</h3>
-                            <input type="hidden" id="editUserId">
+                            <input type="hidden" id="userId">
                             <input type="text" id="userUsername" placeholder="Usuário" class="w-full p-2 border rounded mb-2" required>
-                            <input type="password" id="userPassword" placeholder="Senha" class="w-full p-2 border rounded mb-2">
+                            <input type="password" id="userPassword" placeholder="Senha (deixe em branco para manter a atual)" class="w-full p-2 border rounded mb-2">
                             <select id="userProfile" class="w-full p-2 border rounded mb-2" required>
                                 <option value="">Selecione o Perfil</option>
                                 <option value="administrador">Administrador</option>
@@ -203,6 +203,7 @@
                                 <span class="ml-2">Ativo</span>
                             </label><br>
                             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Salvar Usuário</button>
+                            <button type="button" onclick="clearUserForm()" class="bg-gray-400 text-white px-4 py-2 rounded ml-2">Limpar</button>
                         </form>
                         <h3 class="font-semibold mb-2">Lista de Usuários</h3>
                         <div class="overflow-x-auto">
@@ -225,16 +226,24 @@
                     pageContent = '<p>Erro 404: A página que você tentou acessar não existe.</p>';
             }
             contentArea.innerHTML = `<h2 class="text-2xl font-bold mb-4 capitalize">${pageTitle}</h2><div class="bg-white p-6 rounded shadow">${pageContent}</div>`;
-            // Post-render actions for specific pages
+            
+            if (page === 'movimentacao') {
+                document.getElementById('entradaForm').onsubmit = handleEntry;
+                document.getElementById('saidaForm').onsubmit = handleExit;
+            }
             if (page === 'cadastro') {
-                loadCadastrosLists();
-                document.getElementById('addVehicleForm').onsubmit = addVehicle;
+                loadModelsList();
+                loadPatiosList();
+                loadVehiclesList();
                 document.getElementById('addModelForm').onsubmit = addModel;
                 document.getElementById('addPatioForm').onsubmit = addPatio;
             }
             if (page === 'usuarios') {
                 loadUsersTable();
-                document.getElementById('addUserForm').onsubmit = saveUser;
+                document.getElementById('userForm').onsubmit = saveUser;
+            }
+            if (page === 'consulta') {
+                // no specific event listeners needed here yet, searchVehicle is called directly
             }
         }
 
@@ -243,23 +252,159 @@
             renderUI();
         }
 
-        // CRUD functions for Cadastros (simplified for now)
-        function addVehicle(e) { e.preventDefault(); /* Logic to add vehicle */ alert('Adicionar Veículo (funcionalidade em desenvolvimento)'); loadCadastrosLists(); }
-        function addModel(e) { e.preventDefault(); /* Logic to add model */ alert('Adicionar Modelo (funcionalidade em desenvolvimento)'); loadCadastrosLists(); }
-        function addPatio(e) { e.preventDefault(); /* Logic to add patio */ alert('Adicionar Pátio (funcionalidade em desenvolvimento)'); loadCadastrosLists(); }
-        
-        function loadCadastrosLists() {
-            const vehicles = getFromLocalStorage(STORAGE_KEYS.VEHICLES);
-            const models = getFromLocalStorage(STORAGE_KEYS.MODELS);
-            const patios = getFromLocalStorage(STORAGE_KEYS.PATIOS);
+        // --- Cadastro Functions ---
+        function addModel(e) {
+            e.preventDefault();
+            const name = document.getElementById('newModelName').value.trim();
+            if (!name) return;
+            let models = getFromLocalStorage(STORAGE_KEYS.MODELS);
+            if (models.some(m => m.name.toLowerCase() === name.toLowerCase())) { alert('Modelo já existe!'); return; }
+            models.push({ id: Date.now(), name: name });
+            saveToLocalStorage(STORAGE_KEYS.MODELS, models);
+            document.getElementById('newModelName').value = '';
+            loadModelsList();
+            alert('Modelo adicionado com sucesso!');
+            navigateTo('movimentacao'); // Refresh movimentacao page to update model dropdown
+            navigateTo('cadastro');
+        }
 
-            document.getElementById('vehicleList').innerHTML = vehicles.map(v => `<li>${v.chassi} - ${v.model}</li>`).join('');
+        function loadModelsList() {
+            const models = getFromLocalStorage(STORAGE_KEYS.MODELS);
             document.getElementById('modelList').innerHTML = models.map(m => `<li>${m.name}</li>`).join('');
+        }
+
+        function addPatio(e) {
+            e.preventDefault();
+            const name = document.getElementById('newPatioName').value.trim();
+            if (!name) return;
+            let patios = getFromLocalStorage(STORAGE_KEYS.PATIOS);
+            if (patios.some(p => p.name.toLowerCase() === name.toLowerCase())) { alert('Pátio já existe!'); return; }
+            patios.push({ id: Date.now(), name: name });
+            saveToLocalStorage(STORAGE_KEYS.PATIOS, patios);
+            document.getElementById('newPatioName').value = '';
+            loadPatiosList();
+            alert('Pátio adicionado com sucesso!');
+            navigateTo('movimentacao'); // Refresh movimentacao page to update patio dropdown
+            navigateTo('cadastro');
+        }
+
+        function loadPatiosList() {
+            const patios = getFromLocalStorage(STORAGE_KEYS.PATIOS);
             document.getElementById('patioList').innerHTML = patios.map(p => `<li>${p.name}</li>`).join('');
         }
 
-        // CRUD functions for Users (simplified for now)
-        function saveUser(e) { e.preventDefault(); /* Logic to save user */ alert('Salvar Usuário (funcionalidade em desenvolvimento)'); loadUsersTable(); }
+        function loadVehiclesList() {
+            const vehicles = getFromLocalStorage(STORAGE_KEYS.VEHICLES);
+            document.getElementById('vehicleList').innerHTML = vehicles.map(v => `<li>${v.chassi} - ${v.model} (${v.currentPatio || 'Fora do pátio'})</li>`).join('');
+        }
+
+        // --- Movimentacao Functions ---
+        function handleEntry(e) {
+            e.preventDefault();
+            const chassi = document.getElementById('entradaChassi').value.trim().toUpperCase();
+            const model = document.getElementById('entradaModelo').value;
+            const patio = document.getElementById('entradaPatio').value;
+            const obs = document.getElementById('entradaObs').value.trim();
+
+            if (!chassi || !model || !patio) { alert('Preencha todos os campos obrigatórios.'); return; }
+
+            let vehicles = getFromLocalStorage(STORAGE_KEYS.VEHICLES);
+            let vehicle = vehicles.find(v => v.chassi === chassi);
+
+            if (vehicle && vehicle.currentPatio) { alert(`Veículo ${chassi} já está no pátio ${vehicle.currentPatio}.`); return; }
+
+            if (!vehicle) {
+                vehicle = { id: Date.now(), chassi, model, currentPatio: null };
+                vehicles.push(vehicle);
+            }
+            
+            vehicle.currentPatio = patio;
+            saveToLocalStorage(STORAGE_KEYS.VEHICLES, vehicles);
+
+            let history = getFromLocalStorage(STORAGE_KEYS.HISTORY);
+            history.push({ type: 'entrada', chassi, model, patio, obs, timestamp: new Date().toLocaleString(), user: currentUser.username });
+            saveToLocalStorage(STORAGE_KEYS.HISTORY, history);
+
+            alert(`Veículo ${chassi} entrou no pátio ${patio}.`);
+            document.getElementById('entradaForm').reset();
+            loadVehiclesList(); // Update vehicles list in cadastro if on that page
+            if (document.getElementById('content-area').innerHTML.includes('Dashboard')) navigateTo('dashboard');
+        }
+
+        function handleExit(e) {
+            e.preventDefault();
+            const chassi = document.getElementById('saidaChassi').value.trim().toUpperCase();
+            const obs = document.getElementById('saidaObs').value.trim();
+
+            if (!chassi) { alert('Informe o Chassi para registrar a saída.'); return; }
+
+            let vehicles = getFromLocalStorage(STORAGE_KEYS.VEHICLES);
+            let vehicle = vehicles.find(v => v.chassi === chassi);
+
+            if (!vehicle) { alert(`Veículo ${chassi} não encontrado.`); return; }
+            if (!vehicle.currentPatio) { alert(`Veículo ${chassi} não está em nenhum pátio registrado.`); return; }
+
+            const previousPatio = vehicle.currentPatio;
+            const vehicleModel = vehicle.model; // Store model for history
+            vehicle.currentPatio = null;
+            saveToLocalStorage(STORAGE_KEYS.VEHICLES, vehicles);
+
+            let history = getFromLocalStorage(STORAGE_KEYS.HISTORY);
+            history.push({ type: 'saida', chassi, model: vehicleModel, patio: previousPatio, obs, timestamp: new Date().toLocaleString(), user: currentUser.username });
+            saveToLocalStorage(STORAGE_KEYS.HISTORY, history);
+
+            alert(`Veículo ${chassi} saiu do pátio ${previousPatio}.`);
+            document.getElementById('saidaForm').reset();
+            loadVehiclesList();
+            if (document.getElementById('content-area').innerHTML.includes('Dashboard')) navigateTo('dashboard');
+        }
+
+        // --- Consulta Functions ---
+        function searchVehicle() {
+            const chassi = document.getElementById('searchChassi').value.trim().toUpperCase();
+            const searchResultDiv = document.getElementById('searchResult');
+            searchResultDiv.innerHTML = '';
+
+            if (!chassi) { searchResultDiv.innerHTML = '<p class="text-red-500">Por favor, digite um chassi para buscar.</p>'; return; }
+
+            const vehicles = getFromLocalStorage(STORAGE_KEYS.VEHICLES);
+            const vehicle = vehicles.find(v => v.chassi === chassi);
+
+            if (!vehicle) { searchResultDiv.innerHTML = `<p class="text-red-500">Veículo com chassi ${chassi} não encontrado.</p>`; return; }
+
+            const history = getFromLocalStorage(STORAGE_KEYS.HISTORY).filter(h => h.chassi === chassi);
+
+            let detailsHtml = `
+                <div class="bg-blue-50 p-4 rounded shadow mb-4">
+                    <h4 class="font-bold text-lg mb-2">Detalhes do Veículo: ${vehicle.chassi}</h4>
+                    <p><strong>Modelo:</strong> ${vehicle.model}</p>
+                    <p><strong>Localização Atual:</strong> ${vehicle.currentPatio || 'Fora do Pátio'}</p>
+                </div>
+                <h4 class="font-bold text-lg mb-2">Histórico de Movimentação:</h4>
+            `;
+
+            if (history.length === 0) {
+                detailsHtml += '<p>Nenhum histórico de movimentação encontrado para este veículo.</p>';
+            } else {
+                detailsHtml += `<div class="overflow-x-auto"><table class="min-w-full bg-white border">
+                    <thead><tr><th class="py-2 px-4 border-b">Tipo</th><th class="py-2 px-4 border-b">Pátio</th><th class="py-2 px-4 border-b">Obs/Avarias</th><th class="py-2 px-4 border-b">Data/Hora</th><th class="py-2 px-4 border-b">Usuário</th></tr></thead>
+                    <tbody>
+                        ${history.map(h => `
+                            <tr>
+                                <td class="py-2 px-4 border-b">${h.type.toUpperCase()}</td>
+                                <td class="py-2 px-4 border-b">${h.patio || 'N/A'}</td>
+                                <td class="py-2 px-4 border-b">${h.obs || 'N/A'}</td>
+                                <td class="py-2 px-4 border-b">${h.timestamp}</td>
+                                <td class="py-2 px-4 border-b">${h.user}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table></div>`;
+            }
+            searchResultDiv.innerHTML = detailsHtml;
+        }
+
+        // --- User Management Functions ---
         function loadUsersTable() {
             const users = getFromLocalStorage(STORAGE_KEYS.USERS);
             const tbody = document.getElementById('userTableBody');
@@ -269,33 +414,130 @@
                     <td class="py-2 px-4 border-b">${user.role}</td>
                     <td class="py-2 px-4 border-b">${user.status === 'ativo' ? 'Ativo' : 'Inativo'}</td>
                     <td class="py-2 px-4 border-b">
-                        <button onclick="editUser('${user.username}')" class="bg-yellow-500 text-white px-2 py-1 rounded text-sm mr-1">Editar</button>
-                        <button onclick="toggleUserStatus('${user.username}')" class="${user.status === 'ativo' ? 'bg-orange-500' : 'bg-green-500'} text-white px-2 py-1 rounded text-sm mr-1">${user.status === 'ativo' ? 'Desativar' : 'Ativar'}</button>
-                        <button onclick="deleteUser('${user.username}')" class="bg-red-500 text-white px-2 py-1 rounded text-sm">Excluir</button>
+                        <button onclick="editUser('${user.id}')" class="bg-yellow-500 text-white px-2 py-1 rounded text-sm mr-1">Editar</button>
+                        <button onclick="toggleUserStatus('${user.id}')" class="${user.status === 'ativo' ? 'bg-orange-500' : 'bg-green-500'} text-white px-2 py-1 rounded text-sm mr-1">${user.status === 'ativo' ? 'Desativar' : 'Ativar'}</button>
+                        <button onclick="deleteUser('${user.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-sm">Excluir</button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        function editUser(username) { alert('Editar usuário ' + username + ' (funcionalidade em desenvolvimento)'); /* Logic to load user data into form */ }
-        function toggleUserStatus(username) { alert('Alterar status de ' + username + ' (funcionalidade em desenvolvimento)'); /* Logic to change user status */ loadUsersTable(); }
-        function deleteUser(username) {
-            if (username === 'Leandro') { alert('O usuário Leandro não pode ser excluído.'); return; }
-            const users = getFromLocalStorage(STORAGE_KEYS.USERS);
-            const adminCount = users.filter(u => u.role === 'administrador' && u.status === 'ativo').length;
-            if (adminCount === 1 && users.find(u => u.username === username && u.role === 'administrador' && u.status === 'ativo')) {
-                alert('Não é possível excluir o último administrador ativo do sistema.');
-                return;
+        function saveUser(e) {
+            e.preventDefault();
+            const id = document.getElementById('userId').value;
+            const username = document.getElementById('userUsername').value.trim();
+            const password = document.getElementById('userPassword').value;
+            const role = document.getElementById('userProfile').value;
+            const status = document.getElementById('userStatus').checked ? 'ativo' : 'inativo';
+
+            if (!username || !role) { alert('Usuário e Perfil são obrigatórios.'); return; }
+
+            let users = getFromLocalStorage(STORAGE_KEYS.USERS);
+
+            if (id) { // Editing existing user
+                let userIndex = users.findIndex(u => u.id == id);
+                if (userIndex !== -1) {
+                    const originalUser = users[userIndex];
+
+                    if (originalUser.username === 'Leandro' && role !== 'administrador') {
+                        alert('Não é possível alterar o perfil do usuário Leandro.');
+                        return;
+                    }
+
+                    // Check if another user with the same username exists (excluding current user)
+                    if (users.some(u => u.username === username && u.id != id)) {
+                        alert('Já existe um usuário com este nome.');
+                        return;
+                    }
+
+                    users[userIndex].username = username;
+                    if (password) users[userIndex].password = password;
+                    // Prevent changing Leandro's role even if tried via form
+                    if (originalUser.username !== 'Leandro') {
+                        users[userIndex].role = role;
+                    }
+                    users[userIndex].status = status;
+                    alert('Usuário atualizado com sucesso!');
+                }
+            } else { // Adding new user
+                if (!password) { alert('A senha é obrigatória para novos usuários.'); return; }
+                if (users.some(u => u.username === username)) { alert('Já existe um usuário com este nome.'); return; }
+                users.push({ id: Date.now(), username, password, role, status });
+                alert('Usuário adicionado com sucesso!');
             }
-            if (confirm(`Tem certeza que deseja excluir o usuário ${username}?`)) {
-                // Logic to delete user
-                alert('Excluir usuário ' + username + ' (funcionalidade em desenvolvimento)');
-                loadUsersTable();
+            saveToLocalStorage(STORAGE_KEYS.USERS, users);
+            clearUserForm();
+            loadUsersTable();
+        }
+
+        function editUser(id) {
+            const users = getFromLocalStorage(STORAGE_KEYS.USERS);
+            const user = users.find(u => u.id == id);
+            if (user) {
+                document.getElementById('userId').value = user.id;
+                document.getElementById('userUsername').value = user.username;
+                document.getElementById('userPassword').value = ''; // Don't show password
+                document.getElementById('userProfile').value = user.role;
+                document.getElementById('userStatus').checked = (user.status === 'ativo');
+                // Disable role selection for Leandro
+                document.getElementById('userProfile').disabled = (user.username === 'Leandro');
             }
         }
 
-        // Consulta Vehicle
-        function searchVehicle() { alert('Buscar veículo (funcionalidade em desenvolvimento)'); /* Logic to search and display vehicle details */}
+        function toggleUserStatus(id) {
+            let users = getFromLocalStorage(STORAGE_KEYS.USERS);
+            let userIndex = users.findIndex(u => u.id == id);
+            if (userIndex === -1) return;
+
+            const user = users[userIndex];
+
+            if (user.username === 'Leandro') { alert('Não é possível desativar o usuário Leandro.'); return; }
+
+            if (user.status === 'ativo' && user.role === 'administrador') {
+                const activeAdmins = users.filter(u => u.role === 'administrador' && u.status === 'ativo' && u.id != user.id);
+                if (activeAdmins.length === 0) {
+                    alert('Não é possível desativar o último administrador ativo do sistema.');
+                    return;
+                }
+            }
+            user.status = user.status === 'ativo' ? 'inativo' : 'ativo';
+            saveToLocalStorage(STORAGE_KEYS.USERS, users);
+            loadUsersTable();
+            alert(`Usuário ${user.username} foi ${user.status === 'ativo' ? 'ativado' : 'desativado'}.`);
+        }
+
+        function deleteUser(id) {
+            let users = getFromLocalStorage(STORAGE_KEYS.USERS);
+            let userToDelete = users.find(u => u.id == id);
+
+            if (!userToDelete) return;
+
+            if (userToDelete.username === 'Leandro') { alert('O usuário Leandro não pode ser excluído.'); return; }
+
+            if (userToDelete.role === 'administrador') {
+                const activeAdmins = users.filter(u => u.role === 'administrador' && u.status === 'ativo' && u.id != userToDelete.id);
+                if (activeAdmins.length === 0) {
+                    alert('Não é possível excluir o último administrador ativo do sistema.');
+                    return;
+                }
+            }
+
+            if (confirm(`Tem certeza que deseja excluir o usuário ${userToDelete.username}?`)) {
+                users = users.filter(u => u.id != id);
+                saveToLocalStorage(STORAGE_KEYS.USERS, users);
+                loadUsersTable();
+                alert('Usuário excluído com sucesso!');
+            }
+        }
+
+        function clearUserForm() {
+            document.getElementById('userId').value = '';
+            document.getElementById('userUsername').value = '';
+            document.getElementById('userPassword').value = '';
+            document.getElementById('userProfile').value = '';
+            document.getElementById('userStatus').checked = false;
+            document.getElementById('userProfile').disabled = false;
+        }
 
         // Initialize app and render UI on page load
         initializeApp();
